@@ -16,6 +16,7 @@ type AuthService interface {
 type authService struct {
 }
 
+// NewAuthService is a instance of AuthService
 func NewAuthService() AuthService {
 	return &authService{}
 }

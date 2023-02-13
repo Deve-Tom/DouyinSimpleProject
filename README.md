@@ -1,5 +1,37 @@
 # DouyinSimpleProject
 
+## Structure
+
+```
+.
+├── LICENSE
+├── README.md
+├── conf.yaml    // 配置文件
+├── config       // 配置一些全局变量以及初始化操作
+├── controller   // Controller 层业务逻辑
+├── dao          // DAO 层业务逻辑
+├── dto          // 定义 DTO 对象
+├── entity       // 实体类
+├── go.mod
+├── go.sum
+├── main.go      // 主函数
+├── router       // 路由设置
+├── service      // Service 层业务逻辑
+└── utils        // 一些工具函数
+    └── gen_code.go
+```
+## Getting started
+
+```
+$ go run main.go
+```
+
+## Release
+- 2023.2.13 王帅 组织项目架构，实现简单的用户登录和注册逻辑
+  1. 采用分层架构: `Entity - Service - Controller`
+  2. 添加 `GORM` 模块, 定义 `User` 和 `Video` 实体类，测试 `Migration` 功能，生成表之间的外键
+  3. 使用 `GORM` 的 `Gen` 功能根据 `Entity` 类自动生成 `DAO` 层代码
+
 - 2023.2.3 贺胜 initial
   1. 创建了bisicFunction和test文件夹，basicFunction用于保存基本功能模块的源文件，test文件夹用于保存单元测试源文件
   2. 在主目录下创建了main.go源文件以及router.go源文件，main.go源文件用于在之后进行集成（在开发之中不做任何处理，可暂时忽略），router.go文件引用自simple-demo项目，删除了附属功能2的所有内容
