@@ -7,22 +7,26 @@ import (
 	"DouyinSimpleProject/utils"
 )
 
-type AuthService interface {
+// UserService serves as register, login and user info
+type UserService interface {
+	// auth
 	Login(username, password string) *dto.AuthDTO
 	CreateUser(username, password string) *dto.AuthDTO
 	FindByUsername(username string) *entity.User
 	ComparePassword(oldPassword, newPassword string) bool
+	// user info
+	FindUserByID(id uint) *entity.User
+	GetUserInfo(id uint) *dto.UserInfoDTO
 }
 
-type authService struct {
+type userService struct {
 }
 
-// NewAuthService is a instance of AuthService
-func NewAuthService() AuthService {
-	return &authService{}
+func NewUserService() UserService {
+	return &userService{}
 }
 
-func (s *authService) Login(username, password string) *dto.AuthDTO {
+func (s *userService) Login(username, password string) *dto.AuthDTO {
 	// 1. check whether the user already exists with username
 	user := s.FindByUsername(username)
 	if user == nil {
@@ -40,7 +44,7 @@ func (s *authService) Login(username, password string) *dto.AuthDTO {
 	}
 }
 
-func (s *authService) CreateUser(username, password string) *dto.AuthDTO {
+func (s *userService) CreateUser(username, password string) *dto.AuthDTO {
 	if user := s.FindByUsername(username); user != nil {
 		return nil
 	}
@@ -56,7 +60,7 @@ func (s *authService) CreateUser(username, password string) *dto.AuthDTO {
 	}
 }
 
-func (s *authService) FindByUsername(username string) *entity.User {
+func (s *userService) FindByUsername(username string) *entity.User {
 	u := dao.Q.User
 	user, err := u.Where(u.Username.Eq(username)).First()
 	if err != nil {
@@ -65,6 +69,31 @@ func (s *authService) FindByUsername(username string) *entity.User {
 	return user
 }
 
-func (s *authService) ComparePassword(oldPassword, newPassword string) bool {
+func (s *userService) ComparePassword(oldPassword, newPassword string) bool {
 	return oldPassword == newPassword
+}
+
+func (s *userService) GetUserInfo(id uint) *dto.UserInfoDTO {
+	user := s.FindUserByID(id)
+	if user == nil {
+		return nil
+	}
+	// TODO
+	isFollow := true
+	return &dto.UserInfoDTO{
+		ID:            id,
+		Name:          user.Nickname,
+		FollowCount:   user.FollowCount,
+		FollowerCount: user.FollowerCount,
+		IsFollow:      isFollow,
+	}
+}
+
+func (s *userService) FindUserByID(id uint) *entity.User {
+	u := dao.Q.User
+	user, err := u.Where(u.ID.Eq(id)).First()
+	if err != nil {
+		return nil
+	}
+	return user
 }

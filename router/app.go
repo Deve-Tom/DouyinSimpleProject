@@ -9,10 +9,8 @@ import (
 )
 
 var (
-	authService = service.NewAuthService()
-	userService = service.NewUserInfoService()
+	userService = service.NewUserService()
 
-	authController = controller.NewAuthController(authService)
 	userController = controller.NewUserController(userService)
 )
 
@@ -29,9 +27,8 @@ func InitRouter() *gin.Engine {
 	apiRouter := r.Group("/douyin")
 
 	// basic apis
-	apiRouter.POST("/user/register/", authController.Register)
-	apiRouter.POST("/user/login/", authController.Login)
-
+	apiRouter.POST("/user/register/", userController.Register)
+	apiRouter.POST("/user/login/", userController.Login)
 	apiRouter.GET("/user/", middleware.JWTMiddleware(), userController.UserInfo)
 
 	return r
