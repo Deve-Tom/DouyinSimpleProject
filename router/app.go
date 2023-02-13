@@ -2,14 +2,18 @@ package router
 
 import (
 	"DouyinSimpleProject/controller"
+	"DouyinSimpleProject/middleware"
 	"DouyinSimpleProject/service"
 
 	"github.com/gin-gonic/gin"
 )
 
 var (
-	authService    = service.NewAuthService()
+	authService = service.NewAuthService()
+	userService = service.NewUserInfoService()
+
 	authController = controller.NewAuthController(authService)
+	userController = controller.NewUserController(userService)
 )
 
 func InitRouter() *gin.Engine {
@@ -25,8 +29,10 @@ func InitRouter() *gin.Engine {
 	apiRouter := r.Group("/douyin")
 
 	// basic apis
-	apiRouter.POST("/user/register/", authController.RegisterController)
-	apiRouter.POST("/user/login/", authController.LoginController)
+	apiRouter.POST("/user/register/", authController.Register)
+	apiRouter.POST("/user/login/", authController.Login)
+
+	apiRouter.GET("/user/", middleware.JWTMiddleware(), userController.UserInfo)
 
 	return r
 }

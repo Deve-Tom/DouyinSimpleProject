@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"DouyinSimpleProject/controller"
+	"DouyinSimpleProject/dto"
 	"DouyinSimpleProject/utils"
 	"net/http"
 	"time"
@@ -19,7 +19,7 @@ func JWTMiddleware() gin.HandlerFunc {
 		}
 		// no such user
 		if tokenString == "" {
-			ctx.JSON(http.StatusOK, controller.Response{
+			ctx.JSON(http.StatusOK, dto.Response{
 				StatusCode: 1,
 				StatusMsg:  "No such user",
 			})
@@ -29,7 +29,7 @@ func JWTMiddleware() gin.HandlerFunc {
 		// validate token
 		claims, ok := utils.ParseToken(tokenString)
 		if !ok {
-			ctx.JSON(http.StatusOK, controller.Response{
+			ctx.JSON(http.StatusOK, dto.Response{
 				StatusCode: 1,
 				StatusMsg:  "Incorrect token",
 			})
@@ -37,7 +37,7 @@ func JWTMiddleware() gin.HandlerFunc {
 			return
 		}
 		if time.Now().Unix() > claims.ExpiresAt.Unix() {
-			ctx.JSON(http.StatusOK, controller.Response{
+			ctx.JSON(http.StatusOK, dto.Response{
 				StatusCode: 1,
 				StatusMsg:  "Expired token",
 			})

@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"strconv"
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
@@ -32,13 +33,21 @@ func GenToken(uid uint) (string, error) {
 }
 
 func ParseToken(tokenString string) (*CustomClaims, bool) {
-	token, _ := jwt.ParseWithClaims(tokenString, &CustomClaims{}, func(t *jwt.Token) (interface{}, error) {
+	token, err := jwt.ParseWithClaims(tokenString, &CustomClaims{}, func(t *jwt.Token) (interface{}, error) {
 		return secretKey, nil
 	})
+	if err != nil {
+		return nil, false
+	}
 
 	if claims, ok := token.Claims.(*CustomClaims); ok && token.Valid {
 		return claims, true
 	} else {
 		return nil, false
 	}
+}
+
+func String2uint(str string) uint {
+	num, _ := strconv.ParseUint(str, 10, 64)
+	return uint(num)
 }

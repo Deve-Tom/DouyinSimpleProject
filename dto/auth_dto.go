@@ -6,10 +6,7 @@ type AuthDTO struct {
 	Token  string `json:"token,omitempty"`
 }
 
-// NewAuthDTO creates a new instance of AuthDTO
-func NewAuthDTO(uid uint, token string) AuthDTO {
-	return AuthDTO{
-		UserID: uid,
-		Token:  token,
-	}
+type AuthResponse struct {
+	Response
+	AuthDTO
 }
