@@ -1,20 +1,16 @@
 package main
 
 import (
-	"context"
-
-	"github.com/cloudwego/hertz/pkg/app"
-	"github.com/cloudwego/hertz/pkg/app/server"
-	"github.com/cloudwego/hertz/pkg/common/utils"
-	"github.com/cloudwego/hertz/pkg/protocol/consts"
+	"DouyinSimpleProject/config"
+	"DouyinSimpleProject/router"
+	"fmt"
 )
 
 func main() {
-	h := server.Default()
+	config.Setup()
 
-	h.GET("/ping", func(c context.Context, ctx *app.RequestContext) {
-		ctx.JSON(consts.StatusOK, utils.H{"message": "pong"})
-	})
+	r := router.InitRouter()
 
-	h.Spin()
+	serverAddr := fmt.Sprintf("%s:%s", config.SERVER_HOST, config.SERVER_PORT)
+	r.Run(serverAddr)
 }
