@@ -51,7 +51,7 @@ func (c *AuthController) LoginController(ctx *gin.Context) {
 	if authDTO := c.authService.Login(username, password); authDTO == nil {
 		ctx.JSON(http.StatusOK, AuthResponse{
 			Response: NewResponse(
-				0, "Login Error",
+				0, "No such user",
 			),
 		})
 

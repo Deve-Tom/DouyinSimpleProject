@@ -2,8 +2,8 @@ package dto
 
 // AuthDTO is a response for `/user/register/` and `/user/login/`
 type AuthDTO struct {
-	UserID uint   `json:"user_id"`
-	Token  string `json:"token"`
+	UserID uint   `json:"user_id,omitempty"`
+	Token  string `json:"token,omitempty"`
 }
 
 // NewAuthDTO creates a new instance of AuthDTO

@@ -4,6 +4,7 @@ import (
 	"DouyinSimpleProject/dao"
 	"DouyinSimpleProject/dto"
 	"DouyinSimpleProject/entity"
+	"DouyinSimpleProject/utils"
 )
 
 type AuthService interface {
@@ -32,7 +33,7 @@ func (s *authService) Login(username, password string) *dto.AuthDTO {
 		return nil
 	}
 	// 3. generate token according username
-	token := username + "@" + password
+	token, _ := utils.GenToken(user.ID)
 	return &dto.AuthDTO{
 		UserID: user.ID,
 		Token:  token,
@@ -48,7 +49,7 @@ func (s *authService) CreateUser(username, password string) *dto.AuthDTO {
 		Username: username, Password: password, Nickname: username,
 	}
 	_ = u.Create(&newUser)
-	token := username + "@" + password
+	token, _ := utils.GenToken(newUser.ID)
 	return &dto.AuthDTO{
 		UserID: newUser.ID,
 		Token:  token,
