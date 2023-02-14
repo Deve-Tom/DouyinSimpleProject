@@ -37,7 +37,7 @@ func NewVideoService() VideoService {
 
 func (s *videoService) GetVideoList(user_id uint) []dto.VideoDTO {
 	vq := dao.Q.Video
-	videos, err := vq.Where(vq.UserID.Eq(user_id)).Find()
+	videos, err := vq.Preload(vq.User).Where(vq.UserID.Eq(user_id)).Order(vq.CreatedAt.Desc()).Find()
 	if err != nil {
 		return nil
 	}

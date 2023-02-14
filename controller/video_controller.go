@@ -1,7 +1,10 @@
 package controller
 
 import (
+	"DouyinSimpleProject/dto"
 	"DouyinSimpleProject/service"
+	"DouyinSimpleProject/utils"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
@@ -38,4 +41,16 @@ func (c *VideoController) PublishVideo(ctx *gin.Context) {
 	} else {
 		SuccessResponseWithoutData(ctx, msg)
 	}
+}
+
+func (c *VideoController) ListVideo(ctx *gin.Context) {
+	uid := utils.String2uint(ctx.Query("user_id"))
+	videoDTOs := c.videoService.GetVideoList(uid)
+	ctx.JSON(http.StatusOK, dto.VideoResponse{
+		Response: dto.Response{
+			StatusCode: 0,
+			StatusMsg:  "Successfully get video list",
+		},
+		VideoList: videoDTOs,
+	})
 }

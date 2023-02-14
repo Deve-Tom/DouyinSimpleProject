@@ -35,6 +35,7 @@ func InitRouter() *gin.Engine {
 	apiRouter.GET("/user/", middleware.JWTMiddleware(), userController.UserInfo)
 
 	apiRouter.POST("/publish/action/", middleware.JWTMiddleware(), videoController.PublishVideo)
+	apiRouter.GET("/publish/list/", middleware.JWTMiddleware(), videoController.ListVideo)
 
 	return r
 }
