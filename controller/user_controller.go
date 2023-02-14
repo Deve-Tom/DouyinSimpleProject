@@ -24,11 +24,9 @@ func (c *UserController) Register(ctx *gin.Context) {
 	username := ctx.Query("username")
 	password := ctx.Query("password")
 	// get AuthDTO
-	authDTO := c.userService.CreateUser(username, password)
-	if authDTO == nil {
-		ctx.JSON(http.StatusOK, dto.AuthResponse{
-			Response: dto.Response{StatusCode: 1, StatusMsg: "The user already exists"},
-		})
+	authDTO, err := c.userService.CreateUser(username, password)
+	if err != nil {
+		ErrorResponse(ctx, err.Error())
 	} else {
 		ctx.JSON(http.StatusOK, dto.AuthResponse{
 			Response: dto.Response{StatusCode: 0, StatusMsg: "Successfully Register"},
@@ -42,11 +40,8 @@ func (c *UserController) Login(ctx *gin.Context) {
 	username := ctx.Query("username")
 	password := ctx.Query("password")
 
-	if authDTO := c.userService.Login(username, password); authDTO == nil {
-		ctx.JSON(http.StatusOK, dto.AuthResponse{
-			Response: dto.Response{StatusCode: 0, StatusMsg: "No such user"},
-		})
-
+	if authDTO, err := c.userService.Login(username, password); err != nil {
+		ErrorResponse(ctx, err.Error())
 	} else {
 		ctx.JSON(http.StatusOK, dto.AuthResponse{
 			Response: dto.Response{StatusCode: 0, StatusMsg: "Successfully Login"},
@@ -58,14 +53,9 @@ func (c *UserController) Login(ctx *gin.Context) {
 // UserInfo handles `/user/`
 func (c *UserController) UserInfo(ctx *gin.Context) {
 	userID := ctx.Query("user_id")
-	userInfoDTO := c.userService.GetUserInfo(utils.String2uint(userID))
-	if userInfoDTO == nil {
-		ctx.JSON(http.StatusOK, dto.UserInfoResponse{
-			Response: dto.Response{
-				StatusCode: 1,
-				StatusMsg:  "No such user",
-			},
-		})
+	userInfoDTO, err := c.userService.GetUserInfo(utils.String2uint(userID))
+	if err != nil {
+		ErrorResponse(ctx, err.Error())
 	} else {
 		ctx.JSON(http.StatusOK, dto.UserInfoResponse{
 			Response: dto.Response{
