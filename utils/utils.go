@@ -1,6 +1,12 @@
 package utils
 
 import (
+	"DouyinSimpleProject/config"
+	"errors"
+	"fmt"
+	"os"
+	"os/exec"
+	"path/filepath"
 	"strconv"
 	"time"
 
@@ -50,4 +56,29 @@ func ParseToken(tokenString string) (*CustomClaims, bool) {
 func String2uint(str string) uint {
 	num, _ := strconv.ParseUint(str, 10, 64)
 	return uint(num)
+}
+
+func GetFileURL(filename string) string {
+	return fmt.Sprintf(
+		"http://%s:%s/static/%s",
+		config.SERVER_HOST, config.SERVER_PORT, filename,
+	)
+}
+
+// ExtractImageFromVideo extract the first frame from video,
+// and return the cover path like `./public/2_3.jpg`
+func ExtractImageFromVideo(videoName, suffix string) string {
+	videoPath := filepath.Join(config.STATIC_ROOT_PATH, videoName+suffix)
+	coverPath := filepath.Join(config.STATIC_ROOT_PATH, videoName+".jpg")
+	cmd := exec.Command("ffmpeg", "-i", videoPath, "-vframes", "1", coverPath)
+	if _, err := cmd.Output(); err != nil {
+		return config.DEFAULT_COVER_FILENAME
+	} else {
+		if _, err := os.Stat(coverPath); errors.Is(err, os.ErrNotExist) {
+			// ffmpeg execute successfully, but no such generated cover image
+			// we use default cover image instead.
+			return config.DEFAULT_COVER_FILENAME
+		}
+		return videoName + ".jpg"
+	}
 }
