@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"mime/multipart"
 	"path/filepath"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -23,9 +24,10 @@ var videoSuffixMap = map[string]struct{}{
 }
 
 type VideoService interface {
-	GetVideoList(user_id uint) []dto.VideoDTO
+	GetVideoDTOList(limitNum int, latestTime time.Time, uid uint) ([]*dto.VideoDTO, string)
 	Publish(ctx *gin.Context, uid uint, title string, videoFile *multipart.FileHeader) (string, bool)
-	getVideoName(uid uint) string
+	genVideoName(uid uint) string
+	getVideoList(limitNum int, latestTime time.Time, uid uint) ([]*entity.Video, string)
 }
 
 type videoService struct {
@@ -35,18 +37,18 @@ func NewVideoService() VideoService {
 	return &videoService{}
 }
 
-func (s *videoService) GetVideoList(user_id uint) []dto.VideoDTO {
-	vq := dao.Q.Video
-	videos, err := vq.Preload(vq.User).Where(vq.UserID.Eq(user_id)).Order(vq.CreatedAt.Desc()).Find()
-	if err != nil {
-		return nil
+func (s *videoService) GetVideoDTOList(limitNum int, latestTime time.Time, uid uint) ([]*dto.VideoDTO, string) {
+	videos, msg := s.getVideoList(limitNum, latestTime, uid)
+	if videos == nil {
+		return nil, msg
 	}
-	videoDTOList := make([]dto.VideoDTO, len(videos))
+
+	videoDTOList := make([]*dto.VideoDTO, len(videos))
 	// TODO
 	isFollow := true
 	isFavorite := true
 	for i, video := range videos {
-		videoDTOList[i] = dto.VideoDTO{
+		videoDTOList[i] = &dto.VideoDTO{
 			ID: video.ID,
 			Author: dto.AuthorDTO{
 				ID:            video.User.ID,
@@ -61,9 +63,10 @@ func (s *videoService) GetVideoList(user_id uint) []dto.VideoDTO {
 			CommentCount:  video.CommentCount,
 			IsFavorite:    isFavorite,
 			Title:         video.Title,
+			CreatedAt:     video.CreatedAt,
 		}
 	}
-	return videoDTOList
+	return videoDTOList, ""
 }
 
 func (s *videoService) Publish(ctx *gin.Context, uid uint, title string, videoFile *multipart.FileHeader) (string, bool) {
@@ -74,7 +77,7 @@ func (s *videoService) Publish(ctx *gin.Context, uid uint, title string, videoFi
 	}
 
 	// save uploaded video
-	videoName := s.getVideoName(uid)
+	videoName := s.genVideoName(uid)
 	videoFileName := videoName + suffix
 	videoPath := filepath.Join(config.STATIC_ROOT_PATH, videoFileName)
 	if err := ctx.SaveUploadedFile(videoFile, videoPath); err != nil {
@@ -98,9 +101,25 @@ func (s *videoService) Publish(ctx *gin.Context, uid uint, title string, videoFi
 	return "Successfully publish a video", true
 }
 
-func (s *videoService) getVideoName(uid uint) string {
+func (s *videoService) genVideoName(uid uint) string {
 	vq := dao.Q.Video
 	videoCount, _ := vq.Where(vq.UserID.Eq(uid)).Count()
 	videoName := fmt.Sprintf("%d-%d", uid, videoCount+1)
 	return videoName
+}
+
+func (s *videoService) getVideoList(limitNum int, latestTime time.Time, uid uint) ([]*entity.Video, string) {
+	vq := dao.Q.Video
+	_vq := vq.Debug().Preload(vq.User)
+	if uid != 0 {
+		_vq = _vq.Where(vq.UserID.Eq(uid))
+	}
+	videos, err := _vq.Where(vq.CreatedAt.Lte(latestTime)).
+		Order(vq.CreatedAt.Desc()).
+		Limit(limitNum).
+		Find()
+	if err != nil {
+		return nil, err.Error()
+	}
+	return videos, ""
 }

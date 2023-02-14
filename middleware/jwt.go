@@ -1,10 +1,8 @@
 package middleware
 
 import (
-	"DouyinSimpleProject/dto"
+	"DouyinSimpleProject/controller"
 	"DouyinSimpleProject/utils"
-	"net/http"
-	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -17,30 +15,10 @@ func JWTMiddleware() gin.HandlerFunc {
 		if tokenString == "" {
 			tokenString = ctx.PostForm("token")
 		}
-		// no such user
-		if tokenString == "" {
-			ctx.JSON(http.StatusOK, dto.Response{
-				StatusCode: 1,
-				StatusMsg:  "No such user",
-			})
-			ctx.Abort()
-			return
-		}
-		// validate token
-		claims, ok := utils.ParseToken(tokenString)
-		if !ok {
-			ctx.JSON(http.StatusOK, dto.Response{
-				StatusCode: 1,
-				StatusMsg:  "Incorrect token",
-			})
-			ctx.Abort()
-			return
-		}
-		if time.Now().Unix() > claims.ExpiresAt.Unix() {
-			ctx.JSON(http.StatusOK, dto.Response{
-				StatusCode: 1,
-				StatusMsg:  "Expired token",
-			})
+
+		claims, msg := utils.ValidToken(tokenString)
+		if claims == nil {
+			controller.ErrorResponse(ctx, msg)
 			ctx.Abort()
 			return
 		}

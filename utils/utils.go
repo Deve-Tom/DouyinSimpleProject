@@ -53,6 +53,21 @@ func ParseToken(tokenString string) (*CustomClaims, bool) {
 	}
 }
 
+func ValidToken(tokenString string) (*CustomClaims, string) {
+	if tokenString == "" {
+		return nil, "Empty token"
+	}
+
+	claims, ok := ParseToken(tokenString)
+	if !ok {
+		return nil, "Invalid token"
+	}
+	if time.Now().Unix() > claims.ExpiresAt.Unix() {
+		return nil, "Expired token"
+	}
+	return claims, ""
+}
+
 func String2uint(str string) uint {
 	num, _ := strconv.ParseUint(str, 10, 64)
 	return uint(num)

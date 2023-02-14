@@ -18,6 +18,10 @@ var (
 
 	STATIC_ROOT_PATH       string
 	DEFAULT_COVER_FILENAME string
+
+	TIME_FORMAT = "2006-01-02 15:04:05"
+
+	VIDEO_LIMIT int
 )
 
 func SetupViper() {
@@ -68,4 +72,6 @@ func Setup() {
 
 	DEFAULT_COVER_FILENAME = viper.GetString("static.default_cover_path")
 	STATIC_ROOT_PATH = viper.GetString("static.root_path")
+
+	VIDEO_LIMIT = viper.GetInt("video_limit")
 }

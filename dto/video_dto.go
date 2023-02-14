@@ -1,5 +1,7 @@
 package dto
 
+import "time"
+
 type AuthorDTO struct {
 	ID            uint   `json:"id"`
 	Name          string `json:"name"`
@@ -17,11 +19,12 @@ type VideoDTO struct {
 	CommentCount  uint      `json:"comment_count"`
 	IsFavorite    bool      `json:"is_favorite"`
 	Title         string    `json:"title"`
+	CreatedAt     time.Time `json:"-"`
 }
 
 // VideoResponse responses to `/feed/` or `/publish/list`
 type VideoResponse struct {
 	Response
-	NextTime  uint       `json:"next_time,omitempty"`
-	VideoList []VideoDTO `json:"video_list"`
+	NextTime  int64       `json:"next_time,omitempty"`
+	VideoList []*VideoDTO `json:"video_list"`
 }
