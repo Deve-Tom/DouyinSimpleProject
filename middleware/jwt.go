@@ -16,9 +16,9 @@ func JWTMiddleware() gin.HandlerFunc {
 			tokenString = ctx.PostForm("token")
 		}
 
-		claims, msg := utils.ValidToken(tokenString)
-		if claims == nil {
-			controller.ErrorResponse(ctx, msg)
+		claims, err := utils.ValidToken(tokenString)
+		if err != nil {
+			controller.ErrorResponse(ctx, err.Error())
 			ctx.Abort()
 			return
 		}

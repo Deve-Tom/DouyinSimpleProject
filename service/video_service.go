@@ -6,6 +6,7 @@ import (
 	"DouyinSimpleProject/dto"
 	"DouyinSimpleProject/entity"
 	"DouyinSimpleProject/utils"
+	"errors"
 	"fmt"
 	"mime/multipart"
 	"path/filepath"
@@ -24,10 +25,10 @@ var videoSuffixMap = map[string]struct{}{
 }
 
 type VideoService interface {
-	GetVideoDTOList(limitNum int, latestTime time.Time, uid uint) ([]*dto.VideoDTO, string)
-	Publish(ctx *gin.Context, uid uint, title string, videoFile *multipart.FileHeader) (string, bool)
+	GetVideoDTOList(limitNum int, latestTime time.Time, uid uint) ([]*dto.VideoDTO, error)
+	Publish(ctx *gin.Context, uid uint, title string, videoFile *multipart.FileHeader) error
 	genVideoName(uid uint) string
-	getVideoList(limitNum int, latestTime time.Time, uid uint) ([]*entity.Video, string)
+	getVideoList(limitNum int, latestTime time.Time, uid uint) ([]*entity.Video, error)
 }
 
 type videoService struct {
@@ -37,14 +38,15 @@ func NewVideoService() VideoService {
 	return &videoService{}
 }
 
-func (s *videoService) GetVideoDTOList(limitNum int, latestTime time.Time, uid uint) ([]*dto.VideoDTO, string) {
-	videos, msg := s.getVideoList(limitNum, latestTime, uid)
-	if videos == nil {
-		return nil, msg
+// GetVideoDTOList gets a videoDTO list from database according to limitNum, latestTime and uid
+func (s *videoService) GetVideoDTOList(limitNum int, latestTime time.Time, uid uint) ([]*dto.VideoDTO, error) {
+	videos, err := s.getVideoList(limitNum, latestTime, uid)
+	if err != nil {
+		return nil, err
 	}
 
 	videoDTOList := make([]*dto.VideoDTO, len(videos))
-	// TODO
+	// TODO: implement `isFollow` and `isFavorite`
 	isFollow := true
 	isFavorite := true
 	for i, video := range videos {
@@ -66,14 +68,15 @@ func (s *videoService) GetVideoDTOList(limitNum int, latestTime time.Time, uid u
 			CreatedAt:     video.CreatedAt,
 		}
 	}
-	return videoDTOList, ""
+	return videoDTOList, nil
 }
 
-func (s *videoService) Publish(ctx *gin.Context, uid uint, title string, videoFile *multipart.FileHeader) (string, bool) {
+// Publish creates a video and save it into database
+func (s *videoService) Publish(ctx *gin.Context, uid uint, title string, videoFile *multipart.FileHeader) error {
 	// check video type
 	suffix := filepath.Ext(videoFile.Filename)
 	if _, ok := videoSuffixMap[suffix]; !ok {
-		return "Unsupported video type", false
+		return errors.New("unsupported video type")
 	}
 
 	// save uploaded video
@@ -81,7 +84,7 @@ func (s *videoService) Publish(ctx *gin.Context, uid uint, title string, videoFi
 	videoFileName := videoName + suffix
 	videoPath := filepath.Join(config.STATIC_ROOT_PATH, videoFileName)
 	if err := ctx.SaveUploadedFile(videoFile, videoPath); err != nil {
-		return "Save Uploaded File error: " + err.Error(), false
+		return errors.New("save uploaded file error")
 	}
 
 	// extract cover image from video
@@ -95,12 +98,10 @@ func (s *videoService) Publish(ctx *gin.Context, uid uint, title string, videoFi
 		PlayURL:  utils.GetFileURL(videoFileName),
 		CoverURL: utils.GetFileURL(coverFilename),
 	})
-	if err != nil {
-		return err.Error(), false
-	}
-	return "Successfully publish a video", true
+	return err
 }
 
+// genVideoName generate video name, the format is `{user_id}-{videoCount+1}`
 func (s *videoService) genVideoName(uid uint) string {
 	vq := dao.Q.Video
 	videoCount, _ := vq.Where(vq.UserID.Eq(uid)).Count()
@@ -108,9 +109,10 @@ func (s *videoService) genVideoName(uid uint) string {
 	return videoName
 }
 
-func (s *videoService) getVideoList(limitNum int, latestTime time.Time, uid uint) ([]*entity.Video, string) {
+// getVideoList retrieves videos from database
+func (s *videoService) getVideoList(limitNum int, latestTime time.Time, uid uint) ([]*entity.Video, error) {
 	vq := dao.Q.Video
-	_vq := vq.Debug().Preload(vq.User)
+	_vq := vq.Preload(vq.User)
 	if uid != 0 {
 		_vq = _vq.Where(vq.UserID.Eq(uid))
 	}
@@ -119,7 +121,7 @@ func (s *videoService) getVideoList(limitNum int, latestTime time.Time, uid uint
 		Limit(limitNum).
 		Find()
 	if err != nil {
-		return nil, err.Error()
+		return nil, err
 	}
-	return videos, ""
+	return videos, nil
 }

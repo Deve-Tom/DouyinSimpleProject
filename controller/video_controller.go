@@ -22,6 +22,7 @@ func NewVideoController(videoService service.VideoService) VideoController {
 	}
 }
 
+// Feed handles `/feed/`
 func (c *VideoController) Feed(ctx *gin.Context) {
 	// get latest_time from request
 	rawLatestTime := ctx.Query("latest_time")
@@ -36,17 +37,17 @@ func (c *VideoController) Feed(ctx *gin.Context) {
 	var uid uint = 0
 	tokenString := ctx.Query("token")
 	if tokenString != "" {
-		claims, msg := utils.ValidToken(tokenString)
-		if claims == nil {
-			ErrorResponse(ctx, msg)
+		claims, err := utils.ValidToken(tokenString)
+		if err != nil {
+			ErrorResponse(ctx, err.Error())
 			return
 		}
 		uid = claims.UserID
 	}
 
-	videoDTOs, msg := c.videoService.GetVideoDTOList(config.VIDEO_LIMIT, latestTime, uid)
-	if videoDTOs == nil {
-		ErrorResponse(ctx, msg)
+	videoDTOs, err := c.videoService.GetVideoDTOList(config.VIDEO_LIMIT, latestTime, uid)
+	if err != nil {
+		ErrorResponse(ctx, err.Error())
 		return
 	}
 
@@ -66,6 +67,7 @@ func (c *VideoController) Feed(ctx *gin.Context) {
 
 }
 
+// PublishVideo handles `/publish/action/`
 func (c *VideoController) PublishVideo(ctx *gin.Context) {
 	//////// 1. Get parameters
 	// we already set user_id in *JWT middleware*
@@ -82,21 +84,21 @@ func (c *VideoController) PublishVideo(ctx *gin.Context) {
 	// only support single-file upload
 	videoFile := form.File["data"][0]
 
-	msg, ok := c.videoService.Publish(ctx, uid, title, videoFile)
-	if !ok {
-		ErrorResponse(ctx, msg)
+	err = c.videoService.Publish(ctx, uid, title, videoFile)
+	if err != nil {
+		ErrorResponse(ctx, err.Error())
 	} else {
-		SuccessResponseWithoutData(ctx, msg)
+		SuccessResponseWithoutData(ctx, "sucessfully publish video")
 	}
 }
 
+// ListVideo handles `/publish/list/`
 func (c *VideoController) ListVideo(ctx *gin.Context) {
 	uid := utils.String2uint(ctx.Query("user_id"))
-	videoDTOs, msg := c.videoService.GetVideoDTOList(-1, time.Now(), uid)
-	if videoDTOs == nil {
-		ErrorResponse(ctx, msg)
+	videoDTOs, err := c.videoService.GetVideoDTOList(-1, time.Now(), uid)
+	if err != nil {
+		ErrorResponse(ctx, err.Error())
 		return
-
 	}
 	ctx.JSON(http.StatusOK, dto.VideoResponse{
 		Response: dto.Response{

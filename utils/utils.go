@@ -38,34 +38,34 @@ func GenToken(uid uint) (string, error) {
 	return tokenString, nil
 }
 
-func ParseToken(tokenString string) (*CustomClaims, bool) {
+func ParseToken(tokenString string) (*CustomClaims, error) {
 	token, err := jwt.ParseWithClaims(tokenString, &CustomClaims{}, func(t *jwt.Token) (interface{}, error) {
 		return secretKey, nil
 	})
 	if err != nil {
-		return nil, false
+		return nil, errors.New("invalid token")
 	}
 
 	if claims, ok := token.Claims.(*CustomClaims); ok && token.Valid {
-		return claims, true
+		return claims, nil
 	} else {
-		return nil, false
+		return nil, errors.New("invalid token")
 	}
 }
 
-func ValidToken(tokenString string) (*CustomClaims, string) {
+func ValidToken(tokenString string) (*CustomClaims, error) {
 	if tokenString == "" {
-		return nil, "Empty token"
+		return nil, errors.New("empty token")
 	}
 
-	claims, ok := ParseToken(tokenString)
-	if !ok {
-		return nil, "Invalid token"
+	claims, err := ParseToken(tokenString)
+	if err != nil {
+		return nil, err
 	}
 	if time.Now().Unix() > claims.ExpiresAt.Unix() {
-		return nil, "Expired token"
+		return nil, errors.New("expired token")
 	}
-	return claims, ""
+	return claims, nil
 }
 
 func String2uint(str string) uint {
