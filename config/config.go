@@ -15,6 +15,9 @@ var (
 	DB          *gorm.DB
 	SERVER_HOST string
 	SERVER_PORT string
+
+	STATIC_ROOT_PATH       string
+	DEFAULT_COVER_FILENAME string
 )
 
 func SetupViper() {
@@ -62,4 +65,7 @@ func Setup() {
 	// get all *GLOBAL VARIABLES*
 	SERVER_HOST = viper.GetString("server.host")
 	SERVER_PORT = viper.GetString("server.port")
+
+	DEFAULT_COVER_FILENAME = viper.GetString("static.default_cover_path")
+	STATIC_ROOT_PATH = viper.GetString("static.root_path")
 }
