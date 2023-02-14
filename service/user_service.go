@@ -45,7 +45,7 @@ func (s *userService) Login(username, password string) (*dto.AuthDTO, error) {
 }
 
 func (s *userService) CreateUser(username, password string) (*dto.AuthDTO, error) {
-	if _, err := s.findUserByUsername(username); err != nil {
+	if _, err := s.findUserByUsername(username); err == nil {
 		return nil, errors.New("username already exists")
 	}
 	u := dao.Q.User
