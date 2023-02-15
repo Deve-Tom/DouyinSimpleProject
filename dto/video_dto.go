@@ -1,6 +1,7 @@
 package dto
 
 import (
+	"DouyinSimpleProject/dao"
 	"DouyinSimpleProject/entity"
 	"DouyinSimpleProject/utils"
 	"time"
@@ -33,7 +34,19 @@ type VideoResponse struct {
 	VideoList []*VideoDTO `json:"video_list"`
 }
 
-func NewVideoDTO(video *entity.Video, isFavorite, isFollow bool) *VideoDTO {
+// NewVideoDTO creates an instance of VideoDTO
+// uid is the LoginUser
+func NewVideoDTO(video *entity.Video, uid uint) *VideoDTO {
+	isFavorite := false
+	// TODO: get isFollow
+	isFollow := false
+	if uid != 0 { // no login user
+		fq := dao.Q.Favorite
+		cnt, err := fq.Where(fq.UserID.Eq(uid)).Where(fq.VideoID.Eq(video.ID)).Count()
+		if err == nil && cnt != 0 {
+			isFavorite = true
+		}
+	}
 	return &VideoDTO{
 		ID: video.ID,
 		Author: AuthorDTO{

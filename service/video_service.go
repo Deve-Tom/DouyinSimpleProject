@@ -46,11 +46,8 @@ func (s *videoService) GetVideoDTOList(limitNum int, latestTime time.Time, uid u
 	}
 
 	videoDTOList := make([]*dto.VideoDTO, len(videos))
-	// TODO: implement `isFollow` and `isFavorite`
-	isFollow := true
-	isFavorite := true
 	for i, video := range videos {
-		videoDTOList[i] = dto.NewVideoDTO(video, isFavorite, isFollow)
+		videoDTOList[i] = dto.NewVideoDTO(video, uid)
 	}
 	return videoDTOList, nil
 }
@@ -97,6 +94,7 @@ func (s *videoService) genVideoName(uid uint) string {
 func (s *videoService) getVideoList(limitNum int, latestTime time.Time, uid uint) ([]*entity.Video, error) {
 	vq := dao.Q.Video
 	_vq := vq.Preload(vq.User)
+	// judge whether user login
 	if uid != 0 {
 		_vq = _vq.Where(vq.UserID.Eq(uid))
 	}

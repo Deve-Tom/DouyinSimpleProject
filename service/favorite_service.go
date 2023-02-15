@@ -39,9 +39,20 @@ func (s *favoriteService) DO(uid, vid uint) error {
 	if cnt != 0 {
 		return errors.New("repeat thumbs up")
 	}
-	err = fq.Create(&entity.Favorite{
-		UserID:  uid,
-		VideoID: vid,
+	// use transaction to do favorite
+	err = dao.Q.Transaction(func(tx *dao.Query) error {
+		favorite := entity.Favorite{
+			UserID:  uid,
+			VideoID: vid,
+		}
+		if err := tx.Favorite.Create(&favorite); err != nil {
+			return err
+		}
+		_, err := tx.Video.Where(tx.Video.ID.Eq(vid)).UpdateSimple(tx.Video.FavoriteCount.Add(1))
+		if err != nil {
+			return err
+		}
+		return nil
 	})
 	if err != nil {
 		return errors.New("no such video")
@@ -50,9 +61,18 @@ func (s *favoriteService) DO(uid, vid uint) error {
 }
 
 func (s *favoriteService) Cancel(uid, vid uint) error {
-	fq := dao.Q.Favorite
-	// use Unscoped to hard delete, not soft delete
-	_, err := fq.Unscoped().Where(fq.UserID.Eq(uid)).Where(fq.VideoID.Eq(vid)).Delete()
+	// use transaction to cancel favorite
+	err := dao.Q.Transaction(func(tx *dao.Query) error {
+		fq := tx.Favorite
+		// use Unscoped to hard delete, not soft delete
+		_, err := fq.Unscoped().Where(fq.UserID.Eq(uid)).Where(fq.VideoID.Eq(vid)).Delete()
+		if err != nil {
+			return err
+		}
+		vq := tx.Video
+		vq.Where(vq.ID.Eq(vid)).UpdateSimple(vq.FavoriteCount.Sub(1))
+		return nil
+	})
 	if err != nil {
 		return err
 	}
@@ -78,7 +98,7 @@ func (s *favoriteService) GetFavoriteList(uid uint) ([]*dto.VideoDTO, error) {
 	// TODO: isFollow
 	videoDTOList := make([]*dto.VideoDTO, len(videos))
 	for i, v := range videos {
-		videoDTOList[i] = dto.NewVideoDTO(v, true, true)
+		videoDTOList[i] = dto.NewVideoDTO(v, uid)
 	}
 	return videoDTOList, nil
 }
