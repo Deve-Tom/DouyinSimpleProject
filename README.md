@@ -24,15 +24,66 @@
 ```
 ## Getting started
 
-```
-$ go run main.go
-```
+1. Install `ffmpeg` to get the video frame.
+
+    We use `ffmpeg` just to extract the video frame as the cover image.
+
+    Please refer to some documents or search in google to find `How to install ffmpeg?`.
+    
+    If you can't install it, it doesn't matter.  And we just simply use the `default.jpg` instead.
+
+2. Change `server.host` in `conf.yaml` to your **Local Machine's IP Address**.
+
+    Please refer to some documents or search in google to find `How to get your computer's IP Address?`
+
+3. Set `BaseUrl` in the app.
+
+    Refer to [https://bytedance.feishu.cn/docs/doccnM9KkBAdyDhg8qaeGlIz7S7#mC5eiD](https://bytedance.feishu.cn/docs/doccnM9KkBAdyDhg8qaeGlIz7S7#mC5eiD).
+    
+    If you successfully get your IP Address, please use **your own IP Address** instead `http://192.168.1.7:8080` in the above document to fill the `BaseUrl` field in the advanced setting.
+
+    For example, if your own IP Addresss is `192.168.108`, you should fill the `BaseUrl` to `http://192.168.108:8080` (`8080` is the port we set in the `conf.yaml`).
+
+4. Just run this command in the root folder of your project:
+    ```
+    $ go run main.go
+    ```
 
 ## Release
 
 - 2023.2.15 王帅
 
-  - 实现简单的点赞, 取消点赞功能
+  - 实现简单的点赞, 取消点赞, 查看点赞列表功能
+
+  - 修复功能异常部分
+
+    - 可以获取用户注册时的昵称
+    
+    - 用户获赞数API文档中没有定义
+
+    - 关注数和粉丝数是社交模块的功能，目前尚未实现，默认均为0
+
+    - 修复视频列表的获取
+    
+    - 用户喜欢作品数和发布作品数API文档中没有定义（可能app自身问题）
+    
+    - 目前可以在首页正常浏览视频，用户信息页面app本身没有实现浏览视频功能
+
+- 2023.2.15贺胜 test
+
+  - 功能正常部分：
+
+    - 数据库自动建立正常
+
+    - 用户注册可以正确被存储
+
+    - 视频上传正常，可以在数据库种正常找到记录
+
+  - 功能异常部分：
+
+    - 用户仅能够在注册后正确登陆，无法正常获取用户注册时的昵称、获赞数、关注数、粉丝数
+
+    - 视频列表无法获取，无法获得用户的喜欢作品数，发布作品数以及无法正常游览其他视频
 
 - 2023.2.14 王帅
 

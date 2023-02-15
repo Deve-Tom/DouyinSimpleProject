@@ -1,3 +1,10 @@
 .idea/
 .vscode/
 .DS_Store
+
+# `public/` folder is too large
+public/
+!public/default.jpg
+
+# no build
+*.exe
