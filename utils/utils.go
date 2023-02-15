@@ -68,9 +68,12 @@ func ValidToken(tokenString string) (*CustomClaims, error) {
 	return claims, nil
 }
 
-func String2uint(str string) uint {
-	num, _ := strconv.ParseUint(str, 10, 64)
-	return uint(num)
+func String2uint(str string) (uint, error) {
+	num, err := strconv.ParseUint(str, 10, 64)
+	if err != nil {
+		return 0, err
+	}
+	return uint(num), nil
 }
 
 func GetFileURL(filename string) string {

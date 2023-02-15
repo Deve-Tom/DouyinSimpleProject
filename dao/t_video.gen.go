@@ -53,6 +53,11 @@ func newVideo(db *gorm.DB, opts ...gen.DOOption) video {
 				RelationField: field.NewRelation("User.Videos.User", "entity.User"),
 			},
 		},
+		FavoriteVideos: struct {
+			field.RelationField
+		}{
+			RelationField: field.NewRelation("User.FavoriteVideos", "entity.Video"),
+		},
 	}
 
 	_video.fillFieldMap()
@@ -151,6 +156,9 @@ type videoBelongsToUser struct {
 		User struct {
 			field.RelationField
 		}
+	}
+	FavoriteVideos struct {
+		field.RelationField
 	}
 }
 

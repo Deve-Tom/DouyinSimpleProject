@@ -22,7 +22,7 @@ func genCode() {
 	})
 	g.UseDB(db)
 	g.ApplyBasic(
-		&entity.User{}, &entity.Video{},
+		&entity.User{}, &entity.Video{}, &entity.Favorite{},
 	)
 
 	g.Execute()

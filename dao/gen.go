@@ -16,39 +16,44 @@ import (
 )
 
 var (
-	Q     = new(Query)
-	User  *user
-	Video *video
+	Q        = new(Query)
+	Favorite *favorite
+	User     *user
+	Video    *video
 )
 
 func SetDefault(db *gorm.DB, opts ...gen.DOOption) {
 	*Q = *Use(db, opts...)
+	Favorite = &Q.Favorite
 	User = &Q.User
 	Video = &Q.Video
 }
 
 func Use(db *gorm.DB, opts ...gen.DOOption) *Query {
 	return &Query{
-		db:    db,
-		User:  newUser(db, opts...),
-		Video: newVideo(db, opts...),
+		db:       db,
+		Favorite: newFavorite(db, opts...),
+		User:     newUser(db, opts...),
+		Video:    newVideo(db, opts...),
 	}
 }
 
 type Query struct {
 	db *gorm.DB
 
-	User  user
-	Video video
+	Favorite favorite
+	User     user
+	Video    video
 }
 
 func (q *Query) Available() bool { return q.db != nil }
 
 func (q *Query) clone(db *gorm.DB) *Query {
 	return &Query{
-		db:    db,
-		User:  q.User.clone(db),
-		Video: q.Video.clone(db),
+		db:       db,
+		Favorite: q.Favorite.clone(db),
+		User:     q.User.clone(db),
+		Video:    q.Video.clone(db),
 	}
 }
 
@@ -62,21 +67,24 @@ func (q *Query) WriteDB() *Query {
 
 func (q *Query) ReplaceDB(db *gorm.DB) *Query {
 	return &Query{
-		db:    db,
-		User:  q.User.replaceDB(db),
-		Video: q.Video.replaceDB(db),
+		db:       db,
+		Favorite: q.Favorite.replaceDB(db),
+		User:     q.User.replaceDB(db),
+		Video:    q.Video.replaceDB(db),
 	}
 }
 
 type queryCtx struct {
-	User  IUserDo
-	Video IVideoDo
+	Favorite IFavoriteDo
+	User     IUserDo
+	Video    IVideoDo
 }
 
 func (q *Query) WithContext(ctx context.Context) *queryCtx {
 	return &queryCtx{
-		User:  q.User.WithContext(ctx),
-		Video: q.Video.WithContext(ctx),
+		Favorite: q.Favorite.WithContext(ctx),
+		User:     q.User.WithContext(ctx),
+		Video:    q.Video.WithContext(ctx),
 	}
 }
 

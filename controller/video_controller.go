@@ -94,7 +94,11 @@ func (c *VideoController) PublishVideo(ctx *gin.Context) {
 
 // ListVideo handles `/publish/list/`
 func (c *VideoController) ListVideo(ctx *gin.Context) {
-	uid := utils.String2uint(ctx.Query("user_id"))
+	uid, err := utils.String2uint(ctx.Query("user_id"))
+	if err != nil {
+		ErrorResponse(ctx, "invalid user_id")
+		return
+	}
 	videoDTOs, err := c.videoService.GetVideoDTOList(-1, time.Now(), uid)
 	if err != nil {
 		ErrorResponse(ctx, err.Error())

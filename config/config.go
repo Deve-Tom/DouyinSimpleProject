@@ -34,6 +34,7 @@ func SetupViper() {
 }
 
 func LoadDB() *gorm.DB {
+	SetupViper()
 	dns := fmt.Sprintf(
 		"%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
 		viper.GetString("mysql.user"),
@@ -57,13 +58,13 @@ func LoadDB() *gorm.DB {
 
 func SetupDB() {
 	db := LoadDB()
+	db.SetupJoinTable(&entity.User{}, "FavoriteVideos", &entity.Favorite{})
 	db.AutoMigrate(&entity.User{}, &entity.Video{})
 	// Combine `dao.Query` with db
 	dao.SetDefault(db)
 }
 
 func Setup() {
-	SetupViper()
 	SetupDB()
 
 	// get all *GLOBAL VARIABLES*

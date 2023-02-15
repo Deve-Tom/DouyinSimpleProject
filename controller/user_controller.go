@@ -52,8 +52,12 @@ func (c *UserController) Login(ctx *gin.Context) {
 
 // UserInfo handles `/user/`
 func (c *UserController) UserInfo(ctx *gin.Context) {
-	userID := ctx.Query("user_id")
-	userInfoDTO, err := c.userService.GetUserInfo(utils.String2uint(userID))
+	userID, err := utils.String2uint(ctx.Query("user_id"))
+	if err != nil {
+		ErrorResponse(ctx, "invalid user_id")
+		return
+	}
+	userInfoDTO, err := c.userService.GetUserInfo(userID)
 	if err != nil {
 		ErrorResponse(ctx, err.Error())
 	} else {
