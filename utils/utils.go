@@ -100,3 +100,17 @@ func ExtractImageFromVideo(videoName, suffix string) string {
 		return videoName + ".jpg"
 	}
 }
+
+// UnmarshalJSONTimeStamp converts JS timestamp to `time.Time`
+//
+// Reference: https://gist.github.com/alextanhongpin/3b6b2ee47665ac9c1c32c805b86380a6
+func UnmarshalJSTimeStamp(rawTime string) time.Time {
+	timeStamp, _ := strconv.ParseInt(rawTime, 10, 64)
+	t := time.Unix(timeStamp/1000, (timeStamp%1000)*1000*1000)
+	return t
+}
+
+func MarshalJSTimeStamp(t time.Time) int64 {
+	timeStamp := t.UnixNano() / 1e6
+	return timeStamp
+}

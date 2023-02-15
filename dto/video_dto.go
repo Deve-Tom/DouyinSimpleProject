@@ -16,7 +16,7 @@ type AuthorDTO struct {
 type VideoDTO struct {
 	ID            uint      `json:"id"`
 	Author        AuthorDTO `json:"author"`
-	PlayURL       string    `json:"paly_url"`
+	PlayURL       string    `json:"play_url"`
 	CoverURL      string    `json:"cover_url"`
 	FavoriteCount uint      `json:"favorite_count"`
 	CommentCount  uint      `json:"comment_count"`
