@@ -50,23 +50,7 @@ func (s *videoService) GetVideoDTOList(limitNum int, latestTime time.Time, uid u
 	isFollow := true
 	isFavorite := true
 	for i, video := range videos {
-		videoDTOList[i] = &dto.VideoDTO{
-			ID: video.ID,
-			Author: dto.AuthorDTO{
-				ID:            video.User.ID,
-				Name:          video.User.Nickname,
-				FollowCount:   video.User.FollowCount,
-				FollowerCount: video.User.FollowerCount,
-				IsFollow:      isFollow,
-			},
-			PlayURL:       video.PlayURL,
-			CoverURL:      video.CoverURL,
-			FavoriteCount: video.FavoriteCount,
-			CommentCount:  video.CommentCount,
-			IsFavorite:    isFavorite,
-			Title:         video.Title,
-			CreatedAt:     video.CreatedAt,
-		}
+		videoDTOList[i] = dto.NewVideoDTO(video, isFavorite, isFollow)
 	}
 	return videoDTOList, nil
 }
@@ -95,8 +79,8 @@ func (s *videoService) Publish(ctx *gin.Context, uid uint, title string, videoFi
 	err := vq.Create(&entity.Video{
 		UserID:   uid,
 		Title:    title,
-		PlayURL:  utils.GetFileURL(videoFileName),
-		CoverURL: utils.GetFileURL(coverFilename),
+		PlayURL:  videoFileName,
+		CoverURL: coverFilename,
 	})
 	return err
 }

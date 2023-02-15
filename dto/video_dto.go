@@ -2,6 +2,7 @@ package dto
 
 import (
 	"DouyinSimpleProject/entity"
+	"DouyinSimpleProject/utils"
 	"time"
 )
 
@@ -42,8 +43,8 @@ func NewVideoDTO(video *entity.Video, isFavorite, isFollow bool) *VideoDTO {
 			FollowerCount: video.User.FollowerCount,
 			IsFollow:      isFollow,
 		},
-		PlayURL:       video.PlayURL,
-		CoverURL:      video.CoverURL,
+		PlayURL:       utils.GetFileURL(video.PlayURL),
+		CoverURL:      utils.GetFileURL(video.CoverURL),
 		FavoriteCount: video.FavoriteCount,
 		CommentCount:  video.CommentCount,
 		IsFavorite:    isFavorite,

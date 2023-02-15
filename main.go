@@ -15,6 +15,6 @@ func main() {
 	log.SetFlags(log.Lshortfile | log.Ldate | log.Ltime)
 	log.SetPrefix(">>> ")
 
-	serverAddr := fmt.Sprintf("%s:%s", config.SERVER_HOST, config.SERVER_PORT)
+	serverAddr := fmt.Sprintf(":%s", config.SERVER_PORT)
 	r.Run(serverAddr)
 }

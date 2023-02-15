@@ -62,7 +62,7 @@ func (s *favoriteService) Cancel(uid, vid uint) error {
 func (s *favoriteService) GetFavoriteList(uid uint) ([]*dto.VideoDTO, error) {
 
 	fq := dao.Q.Favorite
-	favorites, err := fq.Debug().Where(fq.UserID.Eq(uid)).Find()
+	favorites, err := fq.Where(fq.UserID.Eq(uid)).Find()
 	if err != nil {
 		return nil, err
 	}
@@ -71,7 +71,7 @@ func (s *favoriteService) GetFavoriteList(uid uint) ([]*dto.VideoDTO, error) {
 		vids[i] = f.VideoID
 	}
 	vq := dao.Q.Video
-	videos, err := vq.Debug().Preload(vq.User).Where(vq.ID.In(vids...)).Order(vq.CreatedAt.Desc()).Find()
+	videos, err := vq.Preload(vq.User).Where(vq.ID.In(vids...)).Order(vq.CreatedAt.Desc()).Find()
 	if err != nil {
 		return nil, err
 	}
