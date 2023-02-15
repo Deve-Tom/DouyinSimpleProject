@@ -1,6 +1,9 @@
 package dto
 
-import "time"
+import (
+	"DouyinSimpleProject/entity"
+	"time"
+)
 
 type AuthorDTO struct {
 	ID            uint   `json:"id"`
@@ -27,4 +30,24 @@ type VideoResponse struct {
 	Response
 	NextTime  int64       `json:"next_time,omitempty"`
 	VideoList []*VideoDTO `json:"video_list"`
+}
+
+func NewVideoDTO(video *entity.Video, isFavorite, isFollow bool) *VideoDTO {
+	return &VideoDTO{
+		ID: video.ID,
+		Author: AuthorDTO{
+			ID:            video.User.ID,
+			Name:          video.User.Nickname,
+			FollowCount:   video.User.FollowCount,
+			FollowerCount: video.User.FollowerCount,
+			IsFollow:      isFollow,
+		},
+		PlayURL:       video.PlayURL,
+		CoverURL:      video.CoverURL,
+		FavoriteCount: video.FavoriteCount,
+		CommentCount:  video.CommentCount,
+		IsFavorite:    isFavorite,
+		Title:         video.Title,
+		CreatedAt:     video.CreatedAt,
+	}
 }

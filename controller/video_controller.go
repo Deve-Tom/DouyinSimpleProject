@@ -5,6 +5,7 @@ import (
 	"DouyinSimpleProject/dto"
 	"DouyinSimpleProject/service"
 	"DouyinSimpleProject/utils"
+	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -104,6 +105,7 @@ func (c *VideoController) ListVideo(ctx *gin.Context) {
 		ErrorResponse(ctx, err.Error())
 		return
 	}
+	log.Printf("%+v\n", videoDTOs)
 	ctx.JSON(http.StatusOK, dto.VideoResponse{
 		Response: dto.Response{
 			StatusCode: 0,

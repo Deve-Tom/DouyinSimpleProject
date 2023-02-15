@@ -1,8 +1,10 @@
 package controller
 
 import (
+	"DouyinSimpleProject/dto"
 	"DouyinSimpleProject/service"
 	"DouyinSimpleProject/utils"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
@@ -36,4 +38,23 @@ func (c *FavoriteController) Action(ctx *gin.Context) {
 		SuccessResponseWithoutData(ctx, "Successfully do this action")
 	}
 
+}
+
+func (c *FavoriteController) FavoriteList(ctx *gin.Context) {
+	uid, err := utils.String2uint(ctx.Query("user_id"))
+	if err != nil {
+		ErrorResponse(ctx, "invalid user_id")
+	}
+	videoDTOList, err := c.favoriteService.GetFavoriteList(uid)
+	if err != nil {
+		ErrorResponse(ctx, err.Error())
+	} else {
+		ctx.JSON(http.StatusOK, dto.VideoResponse{
+			Response: dto.Response{
+				StatusCode: 0,
+				StatusMsg:  "Successfully get favorite list",
+			},
+			VideoList: videoDTOList,
+		})
+	}
 }

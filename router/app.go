@@ -41,6 +41,7 @@ func InitRouter() *gin.Engine {
 	apiRouter.GET("/feed/", videoController.Feed)
 
 	apiRouter.POST("/favorite/action/", middleware.JWTMiddleware(), favoriteController.Action)
+	apiRouter.GET("/favorite/list/", middleware.JWTMiddleware(), favoriteController.FavoriteList)
 
 	return r
 }

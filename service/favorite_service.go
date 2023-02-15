@@ -2,6 +2,7 @@ package service
 
 import (
 	"DouyinSimpleProject/dao"
+	"DouyinSimpleProject/dto"
 	"DouyinSimpleProject/entity"
 	"errors"
 )
@@ -10,6 +11,7 @@ type FavoriteService interface {
 	Action(uid, vid, actionType uint) error
 	DO(uid, vid uint) error
 	Cancel(uid, vid uint) error
+	GetFavoriteList(uid uint) ([]*dto.VideoDTO, error)
 }
 
 type favoriteService struct{}
@@ -55,4 +57,28 @@ func (s *favoriteService) Cancel(uid, vid uint) error {
 		return err
 	}
 	return nil
+}
+
+func (s *favoriteService) GetFavoriteList(uid uint) ([]*dto.VideoDTO, error) {
+
+	fq := dao.Q.Favorite
+	favorites, err := fq.Debug().Where(fq.UserID.Eq(uid)).Find()
+	if err != nil {
+		return nil, err
+	}
+	vids := make([]uint, len(favorites))
+	for i, f := range favorites {
+		vids[i] = f.VideoID
+	}
+	vq := dao.Q.Video
+	videos, err := vq.Debug().Preload(vq.User).Where(vq.ID.In(vids...)).Order(vq.CreatedAt.Desc()).Find()
+	if err != nil {
+		return nil, err
+	}
+	// TODO: isFollow
+	videoDTOList := make([]*dto.VideoDTO, len(videos))
+	for i, v := range videos {
+		videoDTOList[i] = dto.NewVideoDTO(v, true, true)
+	}
+	return videoDTOList, nil
 }
