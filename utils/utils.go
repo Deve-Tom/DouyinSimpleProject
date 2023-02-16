@@ -68,9 +68,12 @@ func ValidToken(tokenString string) (*CustomClaims, error) {
 	return claims, nil
 }
 
-func String2uint(str string) uint {
-	num, _ := strconv.ParseUint(str, 10, 64)
-	return uint(num)
+func String2uint(str string) (uint, error) {
+	num, err := strconv.ParseUint(str, 10, 64)
+	if err != nil {
+		return 0, err
+	}
+	return uint(num), nil
 }
 
 func GetFileURL(filename string) string {
@@ -96,4 +99,18 @@ func ExtractImageFromVideo(videoName, suffix string) string {
 		}
 		return videoName + ".jpg"
 	}
+}
+
+// UnmarshalJSONTimeStamp converts JS timestamp to `time.Time`
+//
+// Reference: https://gist.github.com/alextanhongpin/3b6b2ee47665ac9c1c32c805b86380a6
+func UnmarshalJSTimeStamp(rawTime string) time.Time {
+	timeStamp, _ := strconv.ParseInt(rawTime, 10, 64)
+	t := time.Unix(timeStamp/1000, (timeStamp%1000)*1000*1000)
+	return t
+}
+
+func MarshalJSTimeStamp(t time.Time) int64 {
+	timeStamp := t.UnixNano() / 1e6
+	return timeStamp
 }

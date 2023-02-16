@@ -46,27 +46,8 @@ func (s *videoService) GetVideoDTOList(limitNum int, latestTime time.Time, uid u
 	}
 
 	videoDTOList := make([]*dto.VideoDTO, len(videos))
-	// TODO: implement `isFollow` and `isFavorite`
-	isFollow := true
-	isFavorite := true
 	for i, video := range videos {
-		videoDTOList[i] = &dto.VideoDTO{
-			ID: video.ID,
-			Author: dto.AuthorDTO{
-				ID:            video.User.ID,
-				Name:          video.User.Nickname,
-				FollowCount:   video.User.FollowCount,
-				FollowerCount: video.User.FollowerCount,
-				IsFollow:      isFollow,
-			},
-			PlayURL:       video.PlayURL,
-			CoverURL:      video.CoverURL,
-			FavoriteCount: video.FavoriteCount,
-			CommentCount:  video.CommentCount,
-			IsFavorite:    isFavorite,
-			Title:         video.Title,
-			CreatedAt:     video.CreatedAt,
-		}
+		videoDTOList[i] = dto.NewVideoDTO(video, uid)
 	}
 	return videoDTOList, nil
 }
@@ -95,8 +76,8 @@ func (s *videoService) Publish(ctx *gin.Context, uid uint, title string, videoFi
 	err := vq.Create(&entity.Video{
 		UserID:   uid,
 		Title:    title,
-		PlayURL:  utils.GetFileURL(videoFileName),
-		CoverURL: utils.GetFileURL(coverFilename),
+		PlayURL:  videoFileName,
+		CoverURL: coverFilename,
 	})
 	return err
 }
@@ -113,6 +94,7 @@ func (s *videoService) genVideoName(uid uint) string {
 func (s *videoService) getVideoList(limitNum int, latestTime time.Time, uid uint) ([]*entity.Video, error) {
 	vq := dao.Q.Video
 	_vq := vq.Preload(vq.User)
+	// judge whether user login
 	if uid != 0 {
 		_vq = _vq.Where(vq.UserID.Eq(uid))
 	}

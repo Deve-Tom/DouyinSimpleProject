@@ -6,7 +6,6 @@ import (
 	"DouyinSimpleProject/service"
 	"DouyinSimpleProject/utils"
 	"net/http"
-	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -30,8 +29,7 @@ func (c *VideoController) Feed(ctx *gin.Context) {
 	if rawLatestTime == "" {
 		latestTime = time.Now()
 	} else {
-		intLatestTime, _ := strconv.ParseInt(rawLatestTime, 10, 64)
-		latestTime = time.Unix(intLatestTime, 0)
+		latestTime = utils.UnmarshalJSTimeStamp(rawLatestTime)
 	}
 	// get user_id from request
 	var uid uint = 0
@@ -55,13 +53,13 @@ func (c *VideoController) Feed(ctx *gin.Context) {
 		SuccessResponseWithoutData(ctx, "Ah, no any videos")
 		return
 	}
-
+	nextTime := utils.MarshalJSTimeStamp(videoDTOs[len(videoDTOs)-1].CreatedAt)
 	ctx.JSON(http.StatusOK, dto.VideoResponse{
 		Response: dto.Response{
 			StatusCode: 0,
 			StatusMsg:  "Successfuly fetch videos",
 		},
-		NextTime:  videoDTOs[len(videoDTOs)-1].CreatedAt.Unix(),
+		NextTime:  nextTime,
 		VideoList: videoDTOs,
 	})
 
@@ -94,7 +92,11 @@ func (c *VideoController) PublishVideo(ctx *gin.Context) {
 
 // ListVideo handles `/publish/list/`
 func (c *VideoController) ListVideo(ctx *gin.Context) {
-	uid := utils.String2uint(ctx.Query("user_id"))
+	uid, err := utils.String2uint(ctx.Query("user_id"))
+	if err != nil {
+		ErrorResponse(ctx, "invalid user_id")
+		return
+	}
 	videoDTOs, err := c.videoService.GetVideoDTOList(-1, time.Now(), uid)
 	if err != nil {
 		ErrorResponse(ctx, err.Error())

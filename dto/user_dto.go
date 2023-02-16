@@ -21,5 +21,5 @@ type UserInfoDTO struct {
 
 type UserInfoResponse struct {
 	Response
-	UserInfoDTO
+	UserInfoDTO `json:"user"`
 }

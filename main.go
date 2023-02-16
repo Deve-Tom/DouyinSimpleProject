@@ -3,6 +3,7 @@ package main
 import (
 	"DouyinSimpleProject/config"
 	"DouyinSimpleProject/router"
+	"fmt"
 	"log"
 )
 
@@ -12,6 +13,8 @@ func main() {
 	r := router.InitRouter()
 
 	log.SetFlags(log.Lshortfile | log.Ldate | log.Ltime)
+	log.SetPrefix(">>> ")
 
-	r.Run()
+	serverAddr := fmt.Sprintf(":%s", config.SERVER_PORT)
+	r.Run(serverAddr)
 }
