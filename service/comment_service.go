@@ -117,7 +117,7 @@ func (s *commentService) Delete(uid, vid, commentID uint) (*dto.CommentDTO, erro
 
 func (s *commentService) List(uid, vid uint) ([]*dto.CommentDTO, error) {
 	cq := dao.Q.Comment
-	comments, err := cq.Preload(cq.User).Where(cq.UserID.Eq(uid)).Where(cq.VideoID.Eq(vid)).Find()
+	comments, err := cq.Preload(cq.User).Where(cq.VideoID.Eq(vid)).Order(cq.CreatedAt.Desc()).Find()
 	if err != nil {
 		return nil, err
 	}
