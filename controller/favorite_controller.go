@@ -28,8 +28,7 @@ func (c *FavoriteController) Action(ctx *gin.Context) {
 		ErrorResponse(ctx, "invalid action_type")
 		return
 	}
-	rawID, _ := ctx.Get("user_id")
-	uid, _ := rawID.(uint)
+	uid := GetUIDFromToken(ctx)
 
 	err = c.favoriteService.Action(uid, vid, actionType)
 	if err != nil {

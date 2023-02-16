@@ -13,10 +13,12 @@ var (
 	userService     = service.NewUserService()
 	videoService    = service.NewVideoService()
 	favoriteService = service.NewFavoriteService()
+	commentService  = service.NewCommentService()
 
 	userController     = controller.NewUserController(userService)
 	videoController    = controller.NewVideoController(videoService)
 	favoriteController = controller.NewFavoriteController(favoriteService)
+	commentController  = controller.NewCommentController(commentService)
 )
 
 func InitRouter() *gin.Engine {
@@ -43,5 +45,7 @@ func InitRouter() *gin.Engine {
 	apiRouter.POST("/favorite/action/", middleware.JWTMiddleware(), favoriteController.Action)
 	apiRouter.GET("/favorite/list/", middleware.JWTMiddleware(), favoriteController.FavoriteList)
 
+	apiRouter.POST("/comment/action/", middleware.JWTMiddleware(), commentController.Action)
+	apiRouter.GET("/comment/list/", middleware.JWTMiddleware(), commentController.List)
 	return r
 }

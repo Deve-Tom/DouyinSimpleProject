@@ -114,3 +114,7 @@ func MarshalJSTimeStamp(t time.Time) int64 {
 	timeStamp := t.UnixNano() / 1e6
 	return timeStamp
 }
+
+func GetCommentReponseDate(t time.Time) string {
+	return t.Format("01-02")
+}

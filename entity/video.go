@@ -8,8 +8,9 @@ type Video struct {
 	UserID        uint
 	User          User `gorm:"foreignkey:UserID;constraint:onUpdate:CASCADE,onDELETE:CASCADE"`
 	Title         string
-	PlayURL       string `gorm:"size:255;not null"`
-	CoverURL      string `gorm:"size:255;not null"`
-	FavoriteCount uint   `gorm:"default:0"`
-	CommentCount  uint   `gorm:"default:0"`
+	PlayURL       string    `gorm:"size:255;not null"`
+	CoverURL      string    `gorm:"size:255;not null"`
+	FavoriteCount uint      `gorm:"default:0"`
+	CommentCount  uint      `gorm:"default:0"`
+	Comments      []Comment `gorm:"foreignkey:VideoID;constraint:onUpdate:CASCADE,onDELETE:CASCADE"`
 }
