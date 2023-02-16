@@ -43,7 +43,7 @@ func (c *VideoController) Feed(ctx *gin.Context) {
 		uid = claims.UserID
 	}
 
-	videoDTOs, err := c.videoService.GetVideoDTOList(config.VIDEO_LIMIT, latestTime, uid)
+	videoDTOs, err := c.videoService.GetVideoDTOList(config.VIDEO_LIMIT, latestTime, uid, true)
 	if err != nil {
 		ErrorResponse(ctx, err.Error())
 		return
@@ -96,7 +96,7 @@ func (c *VideoController) ListVideo(ctx *gin.Context) {
 		ErrorResponse(ctx, "invalid user_id")
 		return
 	}
-	videoDTOs, err := c.videoService.GetVideoDTOList(-1, time.Now(), uid)
+	videoDTOs, err := c.videoService.GetVideoDTOList(-1, time.Now(), uid, false)
 	if err != nil {
 		ErrorResponse(ctx, err.Error())
 		return
