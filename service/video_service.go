@@ -25,7 +25,7 @@ var videoSuffixMap = map[string]struct{}{
 }
 
 type VideoService interface {
-	GetVideoDTOList(limitNum int, latestTime time.Time, uid uint) ([]*dto.VideoDTO, error)
+	GetVideoDTOList(limitNum int, latestTime time.Time, uid uint, isFeed bool) ([]*dto.VideoDTO, error)
 	Publish(ctx *gin.Context, uid uint, title string, videoFile *multipart.FileHeader) error
 	genVideoName(uid uint) string
 	getVideoList(limitNum int, latestTime time.Time, uid uint) ([]*entity.Video, error)
@@ -39,8 +39,12 @@ func NewVideoService() VideoService {
 }
 
 // GetVideoDTOList gets a videoDTO list from database according to limitNum, latestTime and uid
-func (s *videoService) GetVideoDTOList(limitNum int, latestTime time.Time, uid uint) ([]*dto.VideoDTO, error) {
-	videos, err := s.getVideoList(limitNum, latestTime, uid)
+func (s *videoService) GetVideoDTOList(limitNum int, latestTime time.Time, uid uint, isFeed bool) ([]*dto.VideoDTO, error) {
+	_uid := uid
+	if isFeed {
+		_uid = 0
+	}
+	videos, err := s.getVideoList(limitNum, latestTime, _uid)
 	if err != nil {
 		return nil, err
 	}

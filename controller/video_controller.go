@@ -43,7 +43,7 @@ func (c *VideoController) Feed(ctx *gin.Context) {
 		uid = claims.UserID
 	}
 
-	videoDTOs, err := c.videoService.GetVideoDTOList(config.VIDEO_LIMIT, latestTime, uid)
+	videoDTOs, err := c.videoService.GetVideoDTOList(config.VIDEO_LIMIT, latestTime, uid, true)
 	if err != nil {
 		ErrorResponse(ctx, err.Error())
 		return
@@ -69,8 +69,7 @@ func (c *VideoController) Feed(ctx *gin.Context) {
 func (c *VideoController) PublishVideo(ctx *gin.Context) {
 	//////// 1. Get parameters
 	// we already set user_id in *JWT middleware*
-	rawID, _ := ctx.Get("user_id")
-	uid, _ := rawID.(uint)
+	uid := GetUIDFromToken(ctx)
 
 	// get title and video from form-data
 	title := ctx.PostForm("title")
@@ -97,7 +96,7 @@ func (c *VideoController) ListVideo(ctx *gin.Context) {
 		ErrorResponse(ctx, "invalid user_id")
 		return
 	}
-	videoDTOs, err := c.videoService.GetVideoDTOList(-1, time.Now(), uid)
+	videoDTOs, err := c.videoService.GetVideoDTOList(-1, time.Now(), uid, false)
 	if err != nil {
 		ErrorResponse(ctx, err.Error())
 		return

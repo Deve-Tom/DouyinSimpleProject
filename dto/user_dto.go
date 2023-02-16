@@ -1,5 +1,7 @@
 package dto
 
+import "DouyinSimpleProject/entity"
+
 type AuthDTO struct {
 	UserID uint   `json:"user_id,omitempty"`
 	Token  string `json:"token,omitempty"`
@@ -23,4 +25,19 @@ type UserInfoDTO struct {
 type UserInfoResponse struct {
 	Response
 	UserInfoDTO `json:"user"`
+}
+
+func NewUserInfoDTO(user *entity.User, loginUID uint) *UserInfoDTO {
+	// TODO: get isFollow with loginUID
+	isFollow := false
+	if user.ID == loginUID {
+		isFollow = true
+	}
+	return &UserInfoDTO{
+		ID:            user.ID,
+		Name:          user.Nickname,
+		FollowCount:   user.FollowCount,
+		FollowerCount: user.FollowerCount,
+		IsFollow:      isFollow,
+	}
 }

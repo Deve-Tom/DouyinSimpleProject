@@ -36,28 +36,72 @@ func newVideo(db *gorm.DB, opts ...gen.DOOption) video {
 	_video.CoverURL = field.NewString(tableName, "cover_url")
 	_video.FavoriteCount = field.NewUint(tableName, "favorite_count")
 	_video.CommentCount = field.NewUint(tableName, "comment_count")
+	_video.Comments = videoHasManyComments{
+		db: db.Session(&gorm.Session{}),
+
+		RelationField: field.NewRelation("Comments", "entity.Comment"),
+		User: struct {
+			field.RelationField
+			Videos struct {
+				field.RelationField
+				User struct {
+					field.RelationField
+				}
+				Comments struct {
+					field.RelationField
+				}
+			}
+			Comments struct {
+				field.RelationField
+			}
+			FavoriteVideos struct {
+				field.RelationField
+			}
+		}{
+			RelationField: field.NewRelation("Comments.User", "entity.User"),
+			Videos: struct {
+				field.RelationField
+				User struct {
+					field.RelationField
+				}
+				Comments struct {
+					field.RelationField
+				}
+			}{
+				RelationField: field.NewRelation("Comments.User.Videos", "entity.Video"),
+				User: struct {
+					field.RelationField
+				}{
+					RelationField: field.NewRelation("Comments.User.Videos.User", "entity.User"),
+				},
+				Comments: struct {
+					field.RelationField
+				}{
+					RelationField: field.NewRelation("Comments.User.Videos.Comments", "entity.Comment"),
+				},
+			},
+			Comments: struct {
+				field.RelationField
+			}{
+				RelationField: field.NewRelation("Comments.User.Comments", "entity.Comment"),
+			},
+			FavoriteVideos: struct {
+				field.RelationField
+			}{
+				RelationField: field.NewRelation("Comments.User.FavoriteVideos", "entity.Video"),
+			},
+		},
+		Video: struct {
+			field.RelationField
+		}{
+			RelationField: field.NewRelation("Comments.Video", "entity.Video"),
+		},
+	}
+
 	_video.User = videoBelongsToUser{
 		db: db.Session(&gorm.Session{}),
 
 		RelationField: field.NewRelation("User", "entity.User"),
-		Videos: struct {
-			field.RelationField
-			User struct {
-				field.RelationField
-			}
-		}{
-			RelationField: field.NewRelation("User.Videos", "entity.Video"),
-			User: struct {
-				field.RelationField
-			}{
-				RelationField: field.NewRelation("User.Videos.User", "entity.User"),
-			},
-		},
-		FavoriteVideos: struct {
-			field.RelationField
-		}{
-			RelationField: field.NewRelation("User.FavoriteVideos", "entity.Video"),
-		},
 	}
 
 	_video.fillFieldMap()
@@ -79,7 +123,9 @@ type video struct {
 	CoverURL      field.String
 	FavoriteCount field.Uint
 	CommentCount  field.Uint
-	User          videoBelongsToUser
+	Comments      videoHasManyComments
+
+	User videoBelongsToUser
 
 	fieldMap map[string]field.Expr
 }
@@ -122,7 +168,7 @@ func (v *video) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (v *video) fillFieldMap() {
-	v.fieldMap = make(map[string]field.Expr, 11)
+	v.fieldMap = make(map[string]field.Expr, 12)
 	v.fieldMap["id"] = v.ID
 	v.fieldMap["created_at"] = v.CreatedAt
 	v.fieldMap["updated_at"] = v.UpdatedAt
@@ -146,20 +192,98 @@ func (v video) replaceDB(db *gorm.DB) video {
 	return v
 }
 
-type videoBelongsToUser struct {
+type videoHasManyComments struct {
 	db *gorm.DB
 
 	field.RelationField
 
-	Videos struct {
+	User struct {
 		field.RelationField
-		User struct {
+		Videos struct {
+			field.RelationField
+			User struct {
+				field.RelationField
+			}
+			Comments struct {
+				field.RelationField
+			}
+		}
+		Comments struct {
+			field.RelationField
+		}
+		FavoriteVideos struct {
 			field.RelationField
 		}
 	}
-	FavoriteVideos struct {
+	Video struct {
 		field.RelationField
 	}
+}
+
+func (a videoHasManyComments) Where(conds ...field.Expr) *videoHasManyComments {
+	if len(conds) == 0 {
+		return &a
+	}
+
+	exprs := make([]clause.Expression, 0, len(conds))
+	for _, cond := range conds {
+		exprs = append(exprs, cond.BeCond().(clause.Expression))
+	}
+	a.db = a.db.Clauses(clause.Where{Exprs: exprs})
+	return &a
+}
+
+func (a videoHasManyComments) WithContext(ctx context.Context) *videoHasManyComments {
+	a.db = a.db.WithContext(ctx)
+	return &a
+}
+
+func (a videoHasManyComments) Model(m *entity.Video) *videoHasManyCommentsTx {
+	return &videoHasManyCommentsTx{a.db.Model(m).Association(a.Name())}
+}
+
+type videoHasManyCommentsTx struct{ tx *gorm.Association }
+
+func (a videoHasManyCommentsTx) Find() (result []*entity.Comment, err error) {
+	return result, a.tx.Find(&result)
+}
+
+func (a videoHasManyCommentsTx) Append(values ...*entity.Comment) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Append(targetValues...)
+}
+
+func (a videoHasManyCommentsTx) Replace(values ...*entity.Comment) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Replace(targetValues...)
+}
+
+func (a videoHasManyCommentsTx) Delete(values ...*entity.Comment) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Delete(targetValues...)
+}
+
+func (a videoHasManyCommentsTx) Clear() error {
+	return a.tx.Clear()
+}
+
+func (a videoHasManyCommentsTx) Count() int64 {
+	return a.tx.Count()
+}
+
+type videoBelongsToUser struct {
+	db *gorm.DB
+
+	field.RelationField
 }
 
 func (a videoBelongsToUser) Where(conds ...field.Expr) *videoBelongsToUser {

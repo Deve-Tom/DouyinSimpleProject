@@ -44,6 +44,15 @@ func newUser(db *gorm.DB, opts ...gen.DOOption) user {
 			Videos struct {
 				field.RelationField
 			}
+			Comments struct {
+				field.RelationField
+				User struct {
+					field.RelationField
+				}
+				Video struct {
+					field.RelationField
+				}
+			}
 			FavoriteVideos struct {
 				field.RelationField
 			}
@@ -54,12 +63,44 @@ func newUser(db *gorm.DB, opts ...gen.DOOption) user {
 			}{
 				RelationField: field.NewRelation("Videos.User.Videos", "entity.Video"),
 			},
+			Comments: struct {
+				field.RelationField
+				User struct {
+					field.RelationField
+				}
+				Video struct {
+					field.RelationField
+				}
+			}{
+				RelationField: field.NewRelation("Videos.User.Comments", "entity.Comment"),
+				User: struct {
+					field.RelationField
+				}{
+					RelationField: field.NewRelation("Videos.User.Comments.User", "entity.User"),
+				},
+				Video: struct {
+					field.RelationField
+				}{
+					RelationField: field.NewRelation("Videos.User.Comments.Video", "entity.Video"),
+				},
+			},
 			FavoriteVideos: struct {
 				field.RelationField
 			}{
 				RelationField: field.NewRelation("Videos.User.FavoriteVideos", "entity.Video"),
 			},
 		},
+		Comments: struct {
+			field.RelationField
+		}{
+			RelationField: field.NewRelation("Videos.Comments", "entity.Comment"),
+		},
+	}
+
+	_user.Comments = userHasManyComments{
+		db: db.Session(&gorm.Session{}),
+
+		RelationField: field.NewRelation("Comments", "entity.Comment"),
 	}
 
 	_user.FavoriteVideos = userManyToManyFavoriteVideos{
@@ -87,6 +128,8 @@ type user struct {
 	FollowCount   field.Uint
 	FollowerCount field.Uint
 	Videos        userHasManyVideos
+
+	Comments userHasManyComments
 
 	FavoriteVideos userManyToManyFavoriteVideos
 
@@ -130,7 +173,7 @@ func (u *user) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (u *user) fillFieldMap() {
-	u.fieldMap = make(map[string]field.Expr, 11)
+	u.fieldMap = make(map[string]field.Expr, 12)
 	u.fieldMap["id"] = u.ID
 	u.fieldMap["created_at"] = u.CreatedAt
 	u.fieldMap["updated_at"] = u.UpdatedAt
@@ -163,9 +206,21 @@ type userHasManyVideos struct {
 		Videos struct {
 			field.RelationField
 		}
+		Comments struct {
+			field.RelationField
+			User struct {
+				field.RelationField
+			}
+			Video struct {
+				field.RelationField
+			}
+		}
 		FavoriteVideos struct {
 			field.RelationField
 		}
+	}
+	Comments struct {
+		field.RelationField
 	}
 }
 
@@ -226,6 +281,72 @@ func (a userHasManyVideosTx) Clear() error {
 }
 
 func (a userHasManyVideosTx) Count() int64 {
+	return a.tx.Count()
+}
+
+type userHasManyComments struct {
+	db *gorm.DB
+
+	field.RelationField
+}
+
+func (a userHasManyComments) Where(conds ...field.Expr) *userHasManyComments {
+	if len(conds) == 0 {
+		return &a
+	}
+
+	exprs := make([]clause.Expression, 0, len(conds))
+	for _, cond := range conds {
+		exprs = append(exprs, cond.BeCond().(clause.Expression))
+	}
+	a.db = a.db.Clauses(clause.Where{Exprs: exprs})
+	return &a
+}
+
+func (a userHasManyComments) WithContext(ctx context.Context) *userHasManyComments {
+	a.db = a.db.WithContext(ctx)
+	return &a
+}
+
+func (a userHasManyComments) Model(m *entity.User) *userHasManyCommentsTx {
+	return &userHasManyCommentsTx{a.db.Model(m).Association(a.Name())}
+}
+
+type userHasManyCommentsTx struct{ tx *gorm.Association }
+
+func (a userHasManyCommentsTx) Find() (result []*entity.Comment, err error) {
+	return result, a.tx.Find(&result)
+}
+
+func (a userHasManyCommentsTx) Append(values ...*entity.Comment) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Append(targetValues...)
+}
+
+func (a userHasManyCommentsTx) Replace(values ...*entity.Comment) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Replace(targetValues...)
+}
+
+func (a userHasManyCommentsTx) Delete(values ...*entity.Comment) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Delete(targetValues...)
+}
+
+func (a userHasManyCommentsTx) Clear() error {
+	return a.tx.Clear()
+}
+
+func (a userHasManyCommentsTx) Count() int64 {
 	return a.tx.Count()
 }
 

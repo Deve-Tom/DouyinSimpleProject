@@ -116,6 +116,10 @@ func MarshalJSTimeStamp(t time.Time) int64 {
 	return timeStamp
 }
 
+func GetCommentReponseDate(t time.Time) string {
+	return t.Format("01-02")
+}
+
 // HashAndSalt --- Encrypt password
 func HashAndSalt(pwdStr string) (pwdHash string, err error) {
 	pwd := []byte(pwdStr)

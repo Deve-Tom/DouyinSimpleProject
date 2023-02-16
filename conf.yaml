@@ -1,5 +1,5 @@
 
-video_limit: 8
+video_limit: 3
 
 server:
   host: 192.168.1.108 # change it to your pc ip address

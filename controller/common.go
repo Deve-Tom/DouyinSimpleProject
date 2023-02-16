@@ -20,3 +20,9 @@ func SuccessResponseWithoutData(ctx *gin.Context, msg string) {
 		StatusMsg:  msg,
 	})
 }
+
+func GetUIDFromToken(ctx *gin.Context) uint {
+	rawID, _ := ctx.Get("user_id")
+	uid, _ := rawID.(uint)
+	return uid
+}
