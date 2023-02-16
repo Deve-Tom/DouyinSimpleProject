@@ -19,6 +19,7 @@ type UserInfoDTO struct {
 	IsFollow      bool   `json:"is_follow"`
 }
 
+// UserInfoResponse responses to `/user/`
 type UserInfoResponse struct {
 	Response
 	UserInfoDTO `json:"user"`
