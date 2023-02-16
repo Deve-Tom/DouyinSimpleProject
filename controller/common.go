@@ -21,7 +21,8 @@ func SuccessResponseWithoutData(ctx *gin.Context, msg string) {
 	})
 }
 
-func GetUIDFromToken(ctx *gin.Context) uint {
+// GetUID get user id from token if the token is valid.
+func GetUID(ctx *gin.Context) uint {
 	rawID, _ := ctx.Get("user_id")
 	uid, _ := rawID.(uint)
 	return uid
