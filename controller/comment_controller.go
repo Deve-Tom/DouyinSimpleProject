@@ -18,7 +18,7 @@ func NewCommentController(commentService service.CommentService) CommentControll
 }
 
 func (c *CommentController) Action(ctx *gin.Context) {
-	uid := GetUIDFromToken(ctx)
+	uid := GetUID(ctx)
 	vid, err := utils.String2uint(ctx.Query("video_id"))
 	if err != nil {
 		ErrorResponse(ctx, "invalid video id")
@@ -44,7 +44,17 @@ func (c *CommentController) Action(ctx *gin.Context) {
 }
 
 func (c *CommentController) List(ctx *gin.Context) {
-	uid := GetUIDFromToken(ctx)
+	var uid uint = 0
+	tokenString := ctx.Query("token")
+
+	if tokenString != "" {
+		claims, err := utils.ValidToken(tokenString)
+		if err != nil {
+			ErrorResponse(ctx, err.Error())
+			return
+		}
+		uid = claims.UserID
+	}
 	vid, err := utils.String2uint(ctx.Query("video_id"))
 	if err != nil {
 		ErrorResponse(ctx, err.Error())

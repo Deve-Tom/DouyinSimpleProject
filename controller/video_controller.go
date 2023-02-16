@@ -57,7 +57,7 @@ func (c *VideoController) Feed(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, dto.VideoResponse{
 		Response: dto.Response{
 			StatusCode: 0,
-			StatusMsg:  "Successfuly fetch videos",
+			StatusMsg:  "Successfully fetch videos",
 		},
 		NextTime:  nextTime,
 		VideoList: videoDTOs,
@@ -69,7 +69,7 @@ func (c *VideoController) Feed(ctx *gin.Context) {
 func (c *VideoController) PublishVideo(ctx *gin.Context) {
 	//////// 1. Get parameters
 	// we already set user_id in *JWT middleware*
-	uid := GetUIDFromToken(ctx)
+	uid := GetUID(ctx)
 
 	// get title and video from form-data
 	title := ctx.PostForm("title")

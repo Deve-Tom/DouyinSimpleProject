@@ -102,7 +102,8 @@ func (s *videoService) getVideoList(limitNum int, latestTime time.Time, uid uint
 	if uid != 0 {
 		_vq = _vq.Where(vq.UserID.Eq(uid))
 	}
-	videos, err := _vq.Where(vq.CreatedAt.Lte(latestTime)).
+	// it should be `less`` not `less or equal to`
+	videos, err := _vq.Where(vq.CreatedAt.Lt(latestTime)).
 		Order(vq.CreatedAt.Desc()).
 		Limit(limitNum).
 		Find()

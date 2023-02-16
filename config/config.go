@@ -72,7 +72,7 @@ func Setup() {
 	SERVER_HOST = viper.GetString("server.host")
 	SERVER_PORT = viper.GetString("server.port")
 
-	DEFAULT_COVER_FILENAME = viper.GetString("static.default_cover_path")
+	DEFAULT_COVER_FILENAME = viper.GetString("static.default_cover_filename")
 	STATIC_ROOT_PATH = viper.GetString("static.root_path")
 
 	VIDEO_LIMIT = viper.GetInt("video_limit")

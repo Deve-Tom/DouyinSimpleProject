@@ -46,6 +46,6 @@ func InitRouter() *gin.Engine {
 	apiRouter.GET("/favorite/list/", middleware.JWTMiddleware(), favoriteController.FavoriteList)
 
 	apiRouter.POST("/comment/action/", middleware.JWTMiddleware(), commentController.Action)
-	apiRouter.GET("/comment/list/", middleware.JWTMiddleware(), commentController.List)
+	apiRouter.GET("/comment/list/", commentController.List)
 	return r
 }
