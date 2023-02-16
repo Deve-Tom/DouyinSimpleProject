@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
+	"golang.org/x/crypto/bcrypt"
 )
 
 var secretKey = []byte("SGVsbG9Xb3JsZA")
@@ -117,4 +118,23 @@ func MarshalJSTimeStamp(t time.Time) int64 {
 
 func GetCommentReponseDate(t time.Time) string {
 	return t.Format("01-02")
+}
+
+// HashAndSalt --- Encrypt password
+func HashAndSalt(pwdStr string) (pwdHash string, err error) {
+	pwd := []byte(pwdStr)
+	hash, err := bcrypt.GenerateFromPassword(pwd, bcrypt.MinCost)
+	if err != nil {
+		return "", err
+	}
+	pwdHash = string(hash)
+	return pwdHash, nil
+}
+
+// ComparePasswords Verify password
+func ComparePassword(hashedPwd string, plainPwd string) bool {
+	byteHash := []byte(hashedPwd)
+	bytePwd := []byte(plainPwd)
+	err := bcrypt.CompareHashAndPassword(byteHash, bytePwd)
+	return err == nil
 }
