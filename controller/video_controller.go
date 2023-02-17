@@ -57,7 +57,7 @@ func (c *VideoController) Feed(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, dto.VideoResponse{
 		Response: dto.Response{
 			StatusCode: 0,
-			StatusMsg:  "Successfuly fetch videos",
+			StatusMsg:  "Successfully fetch videos",
 		},
 		NextTime:  nextTime,
 		VideoList: videoDTOs,
