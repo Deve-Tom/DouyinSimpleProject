@@ -41,18 +41,28 @@ func (s *favoriteService) DO(uid, vid uint) error {
 	}
 	// use transaction to do favorite
 	err = dao.Q.Transaction(func(tx *dao.Query) error {
+		video, err := tx.Video.Where(tx.Video.ID.Eq(vid)).First()
+		if err != nil {
+			return err
+		}
 		favorite := entity.Favorite{
-			UserID:  uid,
-			VideoID: vid,
+			UserID:      uid,
+			VideoID:     vid,
+			UserVideoID: video.UserID,
 		}
 		if err := tx.Favorite.Create(&favorite); err != nil {
 			return err
 		}
-		_, err := tx.Video.Where(tx.Video.ID.Eq(vid)).UpdateSimple(tx.Video.FavoriteCount.Add(1))
-		if err != nil {
+		//update video.favorite_count
+		if _, err := tx.Video.Where(tx.Video.ID.Eq(vid)).UpdateSimple(tx.Video.FavoriteCount.Add(1)); err != nil {
 			return err
 		}
-		_, err = tx.User.Where(tx.User.ID.Eq(uid)).UpdateSimple(tx.User.FavoriteCount.Add(1))
+		//update user.favorite_count
+		if _, err = tx.User.Where(tx.User.ID.Eq(uid)).UpdateSimple(tx.User.FavoriteCount.Add(1)); err != nil {
+			return err
+		}
+		//update videouser.TotalFavorCount
+		_, err = tx.User.Where(tx.User.ID.Eq(video.UserID)).UpdateSimple(tx.User.TotalFavorCount.Add(1))
 		if err != nil {
 			return err
 		}
@@ -76,11 +86,28 @@ func (s *favoriteService) Cancel(uid, vid uint) error {
 		if err != nil {
 			return err
 		}
+		//update video.FavoriteCount
 		vq := tx.Video
-		vq.Where(vq.ID.Eq(vid)).UpdateSimple(vq.FavoriteCount.Sub(1))
-
+		_, err = vq.Where(vq.ID.Eq(vid)).UpdateSimple(vq.FavoriteCount.Sub(1))
+		if err != nil {
+			return err
+		}
+		//update user.FavoriteCount
 		uq := tx.User
-		uq.Where(uq.ID.Eq(uid)).UpdateSimple(uq.FavoriteCount.Sub(1))
+		_, err = uq.Where(uq.ID.Eq(uid)).UpdateSimple(uq.FavoriteCount.Sub(1))
+		if err != nil {
+			return err
+		}
+		//update videouser.TotalFavorCount
+		video, err := vq.Where(vq.ID.Eq(vid)).First()
+		if err != nil {
+			return err
+		}
+		_, err = uq.Where(uq.ID.Eq(video.UserID)).UpdateSimple(uq.TotalFavorCount.Sub(1))
+		if err != nil {
+			return err
+		}
+
 		return nil
 	})
 	if err != nil {

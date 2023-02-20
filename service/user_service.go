@@ -22,6 +22,7 @@ type UserService interface {
 	IsUserLegal(userName string, passWord string) error
 	UpdateFavorCnt(user *entity.User, id uint) error
 	UpdateVideoCnt(user *entity.User, id uint) error
+	UpdateTotalFavorCnt(user *entity.User, id uint) error
 }
 
 type userService struct {
@@ -103,9 +104,12 @@ func (s *userService) GetUserInfo(id uint) (*dto.UserInfoDTO, error) {
 	if err := s.UpdateVideoCnt(user, id); err != nil {
 		return nil, err
 	}
-
 	//query favorite count & update user.favoritecount
 	if err := s.UpdateFavorCnt(user, id); err != nil {
+		return nil, err
+	}
+	//query total_favorited count & update user.totalfavorcont
+	if err := s.UpdateTotalFavorCnt(user, id); err != nil {
 		return nil, err
 	}
 
@@ -141,7 +145,7 @@ func (s *userService) IsUserLegal(userName string, passWord string) error {
 	return nil
 }
 
-// query favorite count & update user.favoritecount
+// query video count & update user.workcount
 func (s *userService) UpdateFavorCnt(user *entity.User, id uint) error {
 	fq := dao.Q.Favorite
 	rawFavorCnt, err := fq.Where(fq.UserID.Eq(id)).Count()
@@ -151,19 +155,17 @@ func (s *userService) UpdateFavorCnt(user *entity.User, id uint) error {
 	uq := dao.Q.User
 	favorCnt := uint(rawFavorCnt)
 	if user.FavoriteCount != favorCnt {
-		_, err = uq.Where(uq.ID.Eq(id)).UpdateSimple(uq.FavoriteCount.Value(favorCnt))
-		if err != nil {
+		if _, err = uq.Where(uq.ID.Eq(id)).UpdateSimple(uq.FavoriteCount.Value(favorCnt)); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-// query video count & update user.workcount
+// query favorite count & update user.favoritecount
 func (s *userService) UpdateVideoCnt(user *entity.User, id uint) error {
 	vq := dao.Q.Video
-	_vq := vq.Preload(vq.User)
-	rawWorkCnt, err := _vq.Where(vq.UserID.Eq(id)).Count()
+	rawWorkCnt, err := vq.Where(vq.UserID.Eq(id)).Count()
 	if err != nil {
 		return err
 	}
@@ -171,10 +173,28 @@ func (s *userService) UpdateVideoCnt(user *entity.User, id uint) error {
 	uq := dao.Q.User
 	workCnt := uint(rawWorkCnt)
 	if user.WorkCount != workCnt {
-		_, err = uq.Where(uq.ID.Eq(id)).UpdateSimple(uq.WorkCount.Value(workCnt))
-		if err != nil {
+		if _, err := uq.Where(uq.ID.Eq(id)).UpdateSimple(uq.WorkCount.Value(workCnt)); err != nil {
 			return err
 		}
 	}
+	return nil
+}
+
+// query total_favorited count & update user.totalfavorcont
+func (s *userService) UpdateTotalFavorCnt(user *entity.User, id uint) error {
+	fq := dao.Q.Favorite
+	rawTotalFavorCnt, err := fq.Where(fq.UserVideoID.Eq(id)).Count()
+	if err != nil {
+		return err
+	}
+
+	uq := dao.Q.User
+	totalFavorCnt := uint(rawTotalFavorCnt)
+	if user.TotalFavorCount != totalFavorCnt {
+		if _, err := uq.Where(uq.ID.Eq(id)).UpdateSimple(uq.WorkCount.Value(totalFavorCnt)); err != nil {
+			return err
+		}
+	}
+
 	return nil
 }

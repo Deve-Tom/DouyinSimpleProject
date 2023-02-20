@@ -9,6 +9,7 @@ import "gorm.io/gorm"
 // Setup it using `SetupJoinTable` in config.go.
 type Favorite struct {
 	gorm.Model
-	UserID  uint `gorm:"primaryKey"`
-	VideoID uint `gorm:"primaryKey"`
+	UserID      uint `gorm:"primaryKey"`
+	VideoID     uint `gorm:"primaryKey"`
+	UserVideoID uint `gorm:"default:0"`
 }
