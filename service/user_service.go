@@ -96,15 +96,26 @@ func (s *userService) GetUserInfo(id uint) (*dto.UserInfoDTO, error) {
 	if err != nil {
 		return nil, err
 	}
-	// TODO
-	isFollow := true
-	userInfoDTO := &dto.UserInfoDTO{
-		ID:            id,
-		Name:          user.Nickname,
-		FollowCount:   user.FollowCount,
-		FollowerCount: user.FollowerCount,
-		IsFollow:      isFollow,
+
+	//query video count
+	vq := dao.Q.Video
+	_vq := vq.Preload(vq.User)
+	rawCnt, err := _vq.Where(vq.UserID.Eq(id)).Count()
+	if err != nil {
+		return nil, err
 	}
+
+	//update user.workcount
+	uq := dao.Q.User
+	cnt := uint(rawCnt)
+	if user.WorkCount != cnt {
+		_, err = uq.Where(uq.ID.Eq(id)).UpdateSimple(uq.WorkCount.Value(cnt))
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	userInfoDTO := dto.NewUserInfoDTO(user, id)
 	return userInfoDTO, nil
 }
 

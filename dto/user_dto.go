@@ -19,6 +19,7 @@ type UserInfoDTO struct {
 	FollowCount   uint   `json:"follow_count"`
 	FollowerCount uint   `json:"follower_count"`
 	IsFollow      bool   `json:"is_follow"`
+	WorkCount     uint   `json:"work_count"`
 }
 
 // UserInfoResponse responses to `/user/`
@@ -39,5 +40,6 @@ func NewUserInfoDTO(user *entity.User, loginUID uint) *UserInfoDTO {
 		FollowCount:   user.FollowCount,
 		FollowerCount: user.FollowerCount,
 		IsFollow:      isFollow,
+		WorkCount:     user.WorkCount,
 	}
 }
