@@ -36,6 +36,7 @@ func newUser(db *gorm.DB, opts ...gen.DOOption) user {
 	_user.FollowCount = field.NewUint(tableName, "follow_count")
 	_user.FollowerCount = field.NewUint(tableName, "follower_count")
 	_user.WorkCount = field.NewUint(tableName, "work_count")
+	_user.FavoriteCount = field.NewUint(tableName, "favorite_count")
 	_user.Videos = userHasManyVideos{
 		db: db.Session(&gorm.Session{}),
 
@@ -129,6 +130,7 @@ type user struct {
 	FollowCount   field.Uint
 	FollowerCount field.Uint
 	WorkCount     field.Uint
+	FavoriteCount field.Uint
 	Videos        userHasManyVideos
 
 	Comments userHasManyComments
@@ -160,6 +162,7 @@ func (u *user) updateTableName(table string) *user {
 	u.FollowCount = field.NewUint(table, "follow_count")
 	u.FollowerCount = field.NewUint(table, "follower_count")
 	u.WorkCount = field.NewUint(table, "work_count")
+	u.FavoriteCount = field.NewUint(table, "favorite_count")
 
 	u.fillFieldMap()
 
@@ -176,7 +179,7 @@ func (u *user) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (u *user) fillFieldMap() {
-	u.fieldMap = make(map[string]field.Expr, 13)
+	u.fieldMap = make(map[string]field.Expr, 14)
 	u.fieldMap["id"] = u.ID
 	u.fieldMap["created_at"] = u.CreatedAt
 	u.fieldMap["updated_at"] = u.UpdatedAt
@@ -187,6 +190,7 @@ func (u *user) fillFieldMap() {
 	u.fieldMap["follow_count"] = u.FollowCount
 	u.fieldMap["follower_count"] = u.FollowerCount
 	u.fieldMap["work_count"] = u.WorkCount
+	u.fieldMap["favorite_count"] = u.FavoriteCount
 
 }
 

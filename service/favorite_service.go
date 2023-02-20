@@ -52,11 +52,18 @@ func (s *favoriteService) DO(uid, vid uint) error {
 		if err != nil {
 			return err
 		}
+		_, err = tx.User.Where(tx.User.ID.Eq(uid)).UpdateSimple(tx.User.FavoriteCount.Add(1))
+		if err != nil {
+			return err
+		}
+
 		return nil
+
 	})
 	if err != nil {
 		return errors.New("no such video")
 	}
+
 	return nil
 }
 
@@ -71,6 +78,9 @@ func (s *favoriteService) Cancel(uid, vid uint) error {
 		}
 		vq := tx.Video
 		vq.Where(vq.ID.Eq(vid)).UpdateSimple(vq.FavoriteCount.Sub(1))
+
+		uq := tx.User
+		uq.Where(uq.ID.Eq(uid)).UpdateSimple(uq.FavoriteCount.Sub(1))
 		return nil
 	})
 	if err != nil {

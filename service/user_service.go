@@ -20,6 +20,8 @@ type UserService interface {
 	findUserByID(id uint) (*entity.User, error)
 
 	IsUserLegal(userName string, passWord string) error
+	UpdateFavorCnt(user *entity.User, id uint) error
+	UpdateVideoCnt(user *entity.User, id uint) error
 }
 
 type userService struct {
@@ -97,22 +99,14 @@ func (s *userService) GetUserInfo(id uint) (*dto.UserInfoDTO, error) {
 		return nil, err
 	}
 
-	//query video count
-	vq := dao.Q.Video
-	_vq := vq.Preload(vq.User)
-	rawCnt, err := _vq.Where(vq.UserID.Eq(id)).Count()
-	if err != nil {
+	//query video count & update user.workcount
+	if err := s.UpdateVideoCnt(user, id); err != nil {
 		return nil, err
 	}
 
-	//update user.workcount
-	uq := dao.Q.User
-	cnt := uint(rawCnt)
-	if user.WorkCount != cnt {
-		_, err = uq.Where(uq.ID.Eq(id)).UpdateSimple(uq.WorkCount.Value(cnt))
-		if err != nil {
-			return nil, err
-		}
+	//query favorite count & update user.favoritecount
+	if err := s.UpdateFavorCnt(user, id); err != nil {
+		return nil, err
 	}
 
 	userInfoDTO := dto.NewUserInfoDTO(user, id)
@@ -143,6 +137,44 @@ func (s *userService) IsUserLegal(userName string, passWord string) error {
 	}
 	if len(passWord) > dto.MaxPasswordLength || len(passWord) < dto.MinPasswordLength {
 		return dto.ErrorPasswordLength
+	}
+	return nil
+}
+
+// query favorite count & update user.favoritecount
+func (s *userService) UpdateFavorCnt(user *entity.User, id uint) error {
+	fq := dao.Q.Favorite
+	rawFavorCnt, err := fq.Where(fq.UserID.Eq(id)).Count()
+	if err != nil {
+		return err
+	}
+	uq := dao.Q.User
+	favorCnt := uint(rawFavorCnt)
+	if user.FavoriteCount != favorCnt {
+		_, err = uq.Where(uq.ID.Eq(id)).UpdateSimple(uq.FavoriteCount.Value(favorCnt))
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// query video count & update user.workcount
+func (s *userService) UpdateVideoCnt(user *entity.User, id uint) error {
+	vq := dao.Q.Video
+	_vq := vq.Preload(vq.User)
+	rawWorkCnt, err := _vq.Where(vq.UserID.Eq(id)).Count()
+	if err != nil {
+		return err
+	}
+
+	uq := dao.Q.User
+	workCnt := uint(rawWorkCnt)
+	if user.WorkCount != workCnt {
+		_, err = uq.Where(uq.ID.Eq(id)).UpdateSimple(uq.WorkCount.Value(workCnt))
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
