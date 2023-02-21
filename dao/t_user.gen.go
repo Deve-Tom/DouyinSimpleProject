@@ -35,6 +35,9 @@ func newUser(db *gorm.DB, opts ...gen.DOOption) user {
 	_user.Nickname = field.NewString(tableName, "nickname")
 	_user.FollowCount = field.NewUint(tableName, "follow_count")
 	_user.FollowerCount = field.NewUint(tableName, "follower_count")
+	_user.WorkCount = field.NewUint(tableName, "work_count")
+	_user.FavoriteCount = field.NewUint(tableName, "favorite_count")
+	_user.TotalFavorCount = field.NewUint(tableName, "total_favor_count")
 	_user.Videos = userHasManyVideos{
 		db: db.Session(&gorm.Session{}),
 
@@ -117,17 +120,20 @@ func newUser(db *gorm.DB, opts ...gen.DOOption) user {
 type user struct {
 	userDo
 
-	ALL           field.Asterisk
-	ID            field.Uint
-	CreatedAt     field.Time
-	UpdatedAt     field.Time
-	DeletedAt     field.Field
-	Username      field.String
-	Password      field.String
-	Nickname      field.String
-	FollowCount   field.Uint
-	FollowerCount field.Uint
-	Videos        userHasManyVideos
+	ALL             field.Asterisk
+	ID              field.Uint
+	CreatedAt       field.Time
+	UpdatedAt       field.Time
+	DeletedAt       field.Field
+	Username        field.String
+	Password        field.String
+	Nickname        field.String
+	FollowCount     field.Uint
+	FollowerCount   field.Uint
+	WorkCount       field.Uint
+	FavoriteCount   field.Uint
+	TotalFavorCount field.Uint
+	Videos          userHasManyVideos
 
 	Comments userHasManyComments
 
@@ -157,6 +163,9 @@ func (u *user) updateTableName(table string) *user {
 	u.Nickname = field.NewString(table, "nickname")
 	u.FollowCount = field.NewUint(table, "follow_count")
 	u.FollowerCount = field.NewUint(table, "follower_count")
+	u.WorkCount = field.NewUint(table, "work_count")
+	u.FavoriteCount = field.NewUint(table, "favorite_count")
+	u.TotalFavorCount = field.NewUint(table, "total_favor_count")
 
 	u.fillFieldMap()
 
@@ -173,7 +182,7 @@ func (u *user) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (u *user) fillFieldMap() {
-	u.fieldMap = make(map[string]field.Expr, 12)
+	u.fieldMap = make(map[string]field.Expr, 15)
 	u.fieldMap["id"] = u.ID
 	u.fieldMap["created_at"] = u.CreatedAt
 	u.fieldMap["updated_at"] = u.UpdatedAt
@@ -183,6 +192,9 @@ func (u *user) fillFieldMap() {
 	u.fieldMap["nickname"] = u.Nickname
 	u.fieldMap["follow_count"] = u.FollowCount
 	u.fieldMap["follower_count"] = u.FollowerCount
+	u.fieldMap["work_count"] = u.WorkCount
+	u.fieldMap["favorite_count"] = u.FavoriteCount
+	u.fieldMap["total_favor_count"] = u.TotalFavorCount
 
 }
 

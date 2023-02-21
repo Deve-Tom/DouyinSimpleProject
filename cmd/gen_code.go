@@ -1,7 +1,7 @@
 // Package utils Generate `DAO` code from entities using `gen` package.
 //
 // Run the following command in the root folder:
-// go run ./utils/gen_code.go
+// go run ./cmd/gen_code.go
 // The generated code will be placed in `dao/` folder.
 package main
 

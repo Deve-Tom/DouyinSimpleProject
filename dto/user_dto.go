@@ -14,11 +14,14 @@ type AuthResponse struct {
 }
 
 type UserInfoDTO struct {
-	ID            uint   `json:"id"`
-	Name          string `json:"name"`
-	FollowCount   uint   `json:"follow_count"`
-	FollowerCount uint   `json:"follower_count"`
-	IsFollow      bool   `json:"is_follow"`
+	ID              uint   `json:"id"`
+	Name            string `json:"name"`
+	FollowCount     uint   `json:"follow_count"`
+	FollowerCount   uint   `json:"follower_count"`
+	IsFollow        bool   `json:"is_follow"`
+	WorkCount       uint   `json:"work_count"`
+	FavoriteCount   uint   `json:"favorite_count"`
+	TotalFavorCount uint   `json:"total_favorited"`
 }
 
 // UserInfoResponse responses to `/user/`
@@ -34,10 +37,13 @@ func NewUserInfoDTO(user *entity.User, loginUID uint) *UserInfoDTO {
 		isFollow = true
 	}
 	return &UserInfoDTO{
-		ID:            user.ID,
-		Name:          user.Nickname,
-		FollowCount:   user.FollowCount,
-		FollowerCount: user.FollowerCount,
-		IsFollow:      isFollow,
+		ID:              user.ID,
+		Name:            user.Nickname,
+		FollowCount:     user.FollowCount,
+		FollowerCount:   user.FollowerCount,
+		IsFollow:        isFollow,
+		WorkCount:       user.WorkCount,
+		FavoriteCount:   user.FavoriteCount,
+		TotalFavorCount: user.TotalFavorCount,
 	}
 }

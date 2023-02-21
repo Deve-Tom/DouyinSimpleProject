@@ -83,7 +83,18 @@ func (s *videoService) Publish(ctx *gin.Context, uid uint, title string, videoFi
 		PlayURL:  videoFileName,
 		CoverURL: coverFilename,
 	})
-	return err
+	if err != nil {
+		return err
+	}
+
+	//user.workcount + 1
+	uq := dao.Q.User
+	_, err = uq.Where(uq.ID.Eq(uid)).UpdateSimple(uq.WorkCount.Add(1))
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // genVideoName generate video name, the format is `{user_id}-{videoCount+1}`
