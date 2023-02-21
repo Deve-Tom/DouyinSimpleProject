@@ -59,6 +59,9 @@ func newUser(db *gorm.DB, opts ...gen.DOOption) user {
 			FavoriteVideos struct {
 				field.RelationField
 			}
+			FollowUsers struct {
+				field.RelationField
+			}
 		}{
 			RelationField: field.NewRelation("Videos.User", "entity.User"),
 			Videos: struct {
@@ -92,6 +95,11 @@ func newUser(db *gorm.DB, opts ...gen.DOOption) user {
 			}{
 				RelationField: field.NewRelation("Videos.User.FavoriteVideos", "entity.Video"),
 			},
+			FollowUsers: struct {
+				field.RelationField
+			}{
+				RelationField: field.NewRelation("Videos.User.FollowUsers", "entity.User"),
+			},
 		},
 		Comments: struct {
 			field.RelationField
@@ -110,6 +118,12 @@ func newUser(db *gorm.DB, opts ...gen.DOOption) user {
 		db: db.Session(&gorm.Session{}),
 
 		RelationField: field.NewRelation("FavoriteVideos", "entity.Video"),
+	}
+
+	_user.FollowUsers = userManyToManyFollowUsers{
+		db: db.Session(&gorm.Session{}),
+
+		RelationField: field.NewRelation("FollowUsers", "entity.User"),
 	}
 
 	_user.fillFieldMap()
@@ -138,6 +152,8 @@ type user struct {
 	Comments userHasManyComments
 
 	FavoriteVideos userManyToManyFavoriteVideos
+
+	FollowUsers userManyToManyFollowUsers
 
 	fieldMap map[string]field.Expr
 }
@@ -182,7 +198,7 @@ func (u *user) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (u *user) fillFieldMap() {
-	u.fieldMap = make(map[string]field.Expr, 15)
+	u.fieldMap = make(map[string]field.Expr, 16)
 	u.fieldMap["id"] = u.ID
 	u.fieldMap["created_at"] = u.CreatedAt
 	u.fieldMap["updated_at"] = u.UpdatedAt
@@ -228,6 +244,9 @@ type userHasManyVideos struct {
 			}
 		}
 		FavoriteVideos struct {
+			field.RelationField
+		}
+		FollowUsers struct {
 			field.RelationField
 		}
 	}
@@ -425,6 +444,72 @@ func (a userManyToManyFavoriteVideosTx) Clear() error {
 }
 
 func (a userManyToManyFavoriteVideosTx) Count() int64 {
+	return a.tx.Count()
+}
+
+type userManyToManyFollowUsers struct {
+	db *gorm.DB
+
+	field.RelationField
+}
+
+func (a userManyToManyFollowUsers) Where(conds ...field.Expr) *userManyToManyFollowUsers {
+	if len(conds) == 0 {
+		return &a
+	}
+
+	exprs := make([]clause.Expression, 0, len(conds))
+	for _, cond := range conds {
+		exprs = append(exprs, cond.BeCond().(clause.Expression))
+	}
+	a.db = a.db.Clauses(clause.Where{Exprs: exprs})
+	return &a
+}
+
+func (a userManyToManyFollowUsers) WithContext(ctx context.Context) *userManyToManyFollowUsers {
+	a.db = a.db.WithContext(ctx)
+	return &a
+}
+
+func (a userManyToManyFollowUsers) Model(m *entity.User) *userManyToManyFollowUsersTx {
+	return &userManyToManyFollowUsersTx{a.db.Model(m).Association(a.Name())}
+}
+
+type userManyToManyFollowUsersTx struct{ tx *gorm.Association }
+
+func (a userManyToManyFollowUsersTx) Find() (result []*entity.User, err error) {
+	return result, a.tx.Find(&result)
+}
+
+func (a userManyToManyFollowUsersTx) Append(values ...*entity.User) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Append(targetValues...)
+}
+
+func (a userManyToManyFollowUsersTx) Replace(values ...*entity.User) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Replace(targetValues...)
+}
+
+func (a userManyToManyFollowUsersTx) Delete(values ...*entity.User) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Delete(targetValues...)
+}
+
+func (a userManyToManyFollowUsersTx) Clear() error {
+	return a.tx.Clear()
+}
+
+func (a userManyToManyFollowUsersTx) Count() int64 {
 	return a.tx.Count()
 }
 

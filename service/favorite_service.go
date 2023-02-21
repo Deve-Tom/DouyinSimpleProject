@@ -66,9 +66,7 @@ func (s *favoriteService) DO(uid, vid uint) error {
 		if err != nil {
 			return err
 		}
-
 		return nil
-
 	})
 	if err != nil {
 		return errors.New("no such video")
