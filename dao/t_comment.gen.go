@@ -90,6 +90,11 @@ func newComment(db *gorm.DB, opts ...gen.DOOption) comment {
 		}{
 			RelationField: field.NewRelation("User.FavoriteVideos", "entity.Video"),
 		},
+		FollowUsers: struct {
+			field.RelationField
+		}{
+			RelationField: field.NewRelation("User.FollowUsers", "entity.User"),
+		},
 	}
 
 	_comment.Video = commentBelongsToVideo{
@@ -201,6 +206,9 @@ type commentBelongsToUser struct {
 		field.RelationField
 	}
 	FavoriteVideos struct {
+		field.RelationField
+	}
+	FollowUsers struct {
 		field.RelationField
 	}
 }

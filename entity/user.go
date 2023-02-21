@@ -15,4 +15,5 @@ type User struct {
 	Videos          []Video   `gorm:"foreignkey:UserID;constraint:onUpdate:CASCADE,onDELETE:CASCADE"`
 	FavoriteVideos  []Video   `gorm:"many2many:favorite;constraint:onUpdate:CASCADE,onDELETE:CASCADE"`
 	Comments        []Comment `gorm:"foreignkey:UserID;constraint:onUpdate:CASCADE,onDELETE:CASCADE"`
+	FollowUsers     []*User   `gorm:"many2many:follow;constraint:onUpdate:CASCADE,onDELETE:CASCADE"`
 }

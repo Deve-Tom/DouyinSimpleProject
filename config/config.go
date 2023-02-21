@@ -60,6 +60,8 @@ func SetupDB() {
 	db := LoadDB()
 	db.SetupJoinTable(&entity.User{}, "FavoriteVideos", &entity.Favorite{})
 	// Favorite Table will be generated automatically becase of "many2many"
+	db.SetupJoinTable(&entity.User{}, "FollowUsers", &entity.Follow{})
+	// Follow Table will be generated automatically becase of "many2many"
 	db.AutoMigrate(&entity.User{}, &entity.Video{}, &entity.Comment{})
 	// Combine `dao.Query` with db
 	dao.SetDefault(db)

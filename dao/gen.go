@@ -19,6 +19,7 @@ var (
 	Q        = new(Query)
 	Comment  *comment
 	Favorite *favorite
+	Follow   *follow
 	User     *user
 	Video    *video
 )
@@ -27,6 +28,7 @@ func SetDefault(db *gorm.DB, opts ...gen.DOOption) {
 	*Q = *Use(db, opts...)
 	Comment = &Q.Comment
 	Favorite = &Q.Favorite
+	Follow = &Q.Follow
 	User = &Q.User
 	Video = &Q.Video
 }
@@ -36,6 +38,7 @@ func Use(db *gorm.DB, opts ...gen.DOOption) *Query {
 		db:       db,
 		Comment:  newComment(db, opts...),
 		Favorite: newFavorite(db, opts...),
+		Follow:   newFollow(db, opts...),
 		User:     newUser(db, opts...),
 		Video:    newVideo(db, opts...),
 	}
@@ -46,6 +49,7 @@ type Query struct {
 
 	Comment  comment
 	Favorite favorite
+	Follow   follow
 	User     user
 	Video    video
 }
@@ -57,6 +61,7 @@ func (q *Query) clone(db *gorm.DB) *Query {
 		db:       db,
 		Comment:  q.Comment.clone(db),
 		Favorite: q.Favorite.clone(db),
+		Follow:   q.Follow.clone(db),
 		User:     q.User.clone(db),
 		Video:    q.Video.clone(db),
 	}
@@ -75,6 +80,7 @@ func (q *Query) ReplaceDB(db *gorm.DB) *Query {
 		db:       db,
 		Comment:  q.Comment.replaceDB(db),
 		Favorite: q.Favorite.replaceDB(db),
+		Follow:   q.Follow.replaceDB(db),
 		User:     q.User.replaceDB(db),
 		Video:    q.Video.replaceDB(db),
 	}
@@ -83,6 +89,7 @@ func (q *Query) ReplaceDB(db *gorm.DB) *Query {
 type queryCtx struct {
 	Comment  ICommentDo
 	Favorite IFavoriteDo
+	Follow   IFollowDo
 	User     IUserDo
 	Video    IVideoDo
 }
@@ -91,6 +98,7 @@ func (q *Query) WithContext(ctx context.Context) *queryCtx {
 	return &queryCtx{
 		Comment:  q.Comment.WithContext(ctx),
 		Favorite: q.Favorite.WithContext(ctx),
+		Follow:   q.Follow.WithContext(ctx),
 		User:     q.User.WithContext(ctx),
 		Video:    q.Video.WithContext(ctx),
 	}
