@@ -18,6 +18,9 @@ func NewFollowService() FollowService {
 	return &followService{}
 }
 func (s *followService) Action(uid, fuid, actionType uint) error {
+	if uid == fuid {
+		return errors.New("can not follow yourself")
+	}
 	if actionType == 1 {
 		return s.DO(uid, fuid)
 	} else if actionType == 2 {

@@ -27,9 +27,6 @@ func (c *FollowController) Action(ctx *gin.Context) {
 		return
 	}
 	uid := GetUID(ctx)
-	if uid == fuid {
-		ErrorResponse(ctx, "can not follow yourself")
-	}
 
 	err = c.followService.Action(uid, fuid, actionType)
 	if err != nil {
