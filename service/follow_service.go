@@ -2,6 +2,7 @@ package service
 
 import (
 	"DouyinSimpleProject/dao"
+	"DouyinSimpleProject/dto"
 	"DouyinSimpleProject/entity"
 	"errors"
 )
@@ -10,6 +11,8 @@ type FollowService interface {
 	Action(uid, fuid, actionType uint) error
 	DO(uid, fuid uint) error
 	Cancel(uid, fuid uint) error
+
+	GetFollowList(uid uint) ([]*dto.UserInfoDTO, error)
 }
 
 type followService struct{}
@@ -90,4 +93,27 @@ func (s *followService) Cancel(uid, fuid uint) error {
 	}
 
 	return nil
+}
+
+// get followlist
+func (s *followService) GetFollowList(uid uint) ([]*dto.UserInfoDTO, error) {
+	uq := dao.Q.User
+	fq := dao.Q.Follow
+	user_follows, err := fq.Where(fq.UserID.Eq(uid)).Find()
+	if err != nil {
+		return nil, err
+	}
+	users := make([]*entity.User, len(user_follows))
+
+	for i, user_follow := range user_follows {
+		//TODO:optimization
+		users[i], err = uq.Where(uq.ID.Eq(user_follow.FollowUserID)).First()
+	}
+
+	UserDTOList := make([]*dto.UserInfoDTO, len(users))
+	for i, user := range users {
+		UserDTOList[i] = dto.NewUserInfoDTO(user, uid, true)
+	}
+
+	return UserDTOList, nil
 }
