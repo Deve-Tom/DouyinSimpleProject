@@ -37,7 +37,7 @@ func NewVideoDTO(video *entity.Video, loginUID uint) *VideoDTO {
 			isFavorite = true
 		}
 	}
-	author := NewUserInfoDTO(&video.User, loginUID, false)
+	author := NewUserInfoDTO(&video.User, loginUID)
 	return &VideoDTO{
 		ID:            video.ID,
 		Author:        *author,
