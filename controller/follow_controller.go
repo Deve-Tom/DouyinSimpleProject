@@ -42,8 +42,13 @@ func (c *FollowController) Action(ctx *gin.Context) {
 
 // FollowList handles `/relation/follow/list`
 func (c *FollowController) FollowList(ctx *gin.Context) {
-	uid := GetUID(ctx)
-	userDTOs, err := c.followService.GetFollowList(uid)
+	uid, err := utils.String2uint(ctx.Query("user_id"))
+	if err != nil {
+		ErrorResponse(ctx, "invalid user_id")
+		return
+	}
+	//uid := GetUID(ctx)
+	userDTOs, err := c.followService.GetFollowList(uid, true)
 	if err != nil {
 		ErrorResponse(ctx, err.Error())
 		return
@@ -52,6 +57,27 @@ func (c *FollowController) FollowList(ctx *gin.Context) {
 		Response: dto.Response{
 			StatusCode: 0,
 			StatusMsg:  "Successfully get follow list",
+		},
+		UserList: userDTOs,
+	})
+}
+
+// FollowList handles `/relation/follower/list`
+func (c *FollowController) FollowerList(ctx *gin.Context) {
+	uid, err := utils.String2uint(ctx.Query("user_id"))
+	if err != nil {
+		ErrorResponse(ctx, "invalid user_id")
+		return
+	}
+	userDTOs, err := c.followService.GetFollowList(uid, false)
+	if err != nil {
+		ErrorResponse(ctx, err.Error())
+		return
+	}
+	ctx.JSON(http.StatusOK, dto.FollowInfoResponse{
+		Response: dto.Response{
+			StatusCode: 0,
+			StatusMsg:  "Successfully get follower list",
 		},
 		UserList: userDTOs,
 	})

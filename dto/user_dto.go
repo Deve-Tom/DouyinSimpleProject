@@ -40,13 +40,14 @@ type FollowInfoResponse struct {
 
 func NewUserInfoDTO(user *entity.User, loginUID uint, IsFollowlist bool) *UserInfoDTO {
 	isFollow := false
-	if IsFollowlist == true {
+	if IsFollowlist { //follower | follow list
 		isFollow = true
 	} else {
+		//login user + feed
 		if user.ID == loginUID {
 			isFollow = true
 		}
-		if loginUID != 0 { //login user
+		if loginUID != 0 {
 			fq := dao.Q.Follow
 			cnt, err := fq.Where(fq.UserID.Eq(loginUID)).Where(fq.FollowUserID.Eq(user.ID)).Count()
 			if err != nil {

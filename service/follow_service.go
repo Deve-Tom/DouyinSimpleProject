@@ -12,7 +12,7 @@ type FollowService interface {
 	DO(uid, fuid uint) error
 	Cancel(uid, fuid uint) error
 
-	GetFollowList(uid uint) ([]*dto.UserInfoDTO, error)
+	GetFollowList(uid uint, isFollow bool) ([]*dto.UserInfoDTO, error)
 }
 
 type followService struct{}
@@ -55,7 +55,6 @@ func (s *followService) DO(uid, fuid uint) error {
 		if _, err := tx.User.Where(tx.User.ID.Eq(uid)).UpdateSimple(tx.User.FollowCount.Add(1)); err != nil {
 			return err
 		}
-
 		//update fuser.follower.count
 		if _, err := tx.User.Where(tx.User.ID.Eq(fuid)).UpdateSimple(tx.User.FollowerCount.Add(1)); err != nil {
 			return err
@@ -80,34 +79,44 @@ func (s *followService) Cancel(uid, fuid uint) error {
 		if _, err := tx.User.Where(tx.User.ID.Eq(uid)).UpdateSimple(tx.User.FollowCount.Sub(1)); err != nil {
 			return err
 		}
-
 		//update fuser.follower.count
 		if _, err := tx.User.Where(tx.User.ID.Eq(fuid)).UpdateSimple(tx.User.FollowerCount.Sub(1)); err != nil {
 			return err
 		}
-
 		return nil
 	})
 	if err != nil {
 		return err
 	}
-
 	return nil
 }
 
-// get followlist
-func (s *followService) GetFollowList(uid uint) ([]*dto.UserInfoDTO, error) {
+// get followlist(true) & get followerlist(false)
+func (s *followService) GetFollowList(uid uint, isFollow bool) ([]*dto.UserInfoDTO, error) {
 	uq := dao.Q.User
 	fq := dao.Q.Follow
-	user_follows, err := fq.Where(fq.UserID.Eq(uid)).Find()
+	fq_field := fq.UserID
+	if !isFollow {
+		fq_field = fq.FollowUserID
+	}
+
+	user_follows, err := fq.Where(fq_field.Eq(uid)).Find()
 	if err != nil {
 		return nil, err
 	}
 	users := make([]*entity.User, len(user_follows))
 
 	for i, user_follow := range user_follows {
-		//TODO:optimization
-		users[i], err = uq.Where(uq.ID.Eq(user_follow.FollowUserID)).First()
+		fq_uint := user_follow.FollowUserID
+		if !isFollow {
+			fq_uint = user_follow.UserID
+		}
+
+		//TODO:sql optimization
+		users[i], err = uq.Where(uq.ID.Eq(fq_uint)).First()
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	UserDTOList := make([]*dto.UserInfoDTO, len(users))
