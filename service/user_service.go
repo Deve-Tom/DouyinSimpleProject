@@ -97,7 +97,8 @@ func (s *userService) GetUserInfo(id uint) (*dto.UserInfoDTO, error) {
 		return nil, err
 	}
 
-	userInfoDTO := dto.NewUserInfoDTO(user, id)
+	userInfoDTO := dto.NewUserInfoDTO(user, id, false)
+
 	return userInfoDTO, nil
 }
 
