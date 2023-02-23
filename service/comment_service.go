@@ -73,7 +73,7 @@ func (s *commentService) DO(uid, vid uint, content string) (*dto.CommentDTO, err
 	if err != nil {
 		return nil, err
 	}
-	userInfoDTO := dto.NewUserInfoDTO(user, uid)
+	userInfoDTO := dto.NewUserInfoDTO(user, uid, false)
 	commentDTO := dto.NewCommentDTO(userInfoDTO, commentEntity)
 	return commentDTO, nil
 }
@@ -110,7 +110,7 @@ func (s *commentService) Delete(uid, vid, commentID uint) (*dto.CommentDTO, erro
 	if err != nil {
 		return nil, err
 	}
-	userInfoDTO := dto.NewUserInfoDTO(user, uid)
+	userInfoDTO := dto.NewUserInfoDTO(user, uid, false)
 	commentDTO := dto.NewCommentDTO(userInfoDTO, commentEntity)
 	return commentDTO, nil
 }
@@ -123,7 +123,7 @@ func (s *commentService) List(uid, vid uint) ([]*dto.CommentDTO, error) {
 	}
 	commentDTOList := make([]*dto.CommentDTO, len(comments))
 	for i, comment := range comments {
-		userInfoDTO := dto.NewUserInfoDTO(&comment.User, uid)
+		userInfoDTO := dto.NewUserInfoDTO(&comment.User, uid, false)
 		commentDTOList[i] = dto.NewCommentDTO(userInfoDTO, comment)
 	}
 	return commentDTOList, nil
