@@ -13,6 +13,7 @@ type FollowService interface {
 	Cancel(uid, fuid uint) error
 
 	GetFollowList(uid uint, isFollow bool) ([]*dto.UserInfoDTO, error)
+
 }
 
 type followService struct{}
@@ -21,9 +22,11 @@ func NewFollowService() FollowService {
 	return &followService{}
 }
 func (s *followService) Action(uid, fuid, actionType uint) error {
+
 	if uid == fuid {
 		return errors.New("can not follow yourself")
 	}
+
 	if actionType == 1 {
 		return s.DO(uid, fuid)
 	} else if actionType == 2 {
@@ -125,4 +128,5 @@ func (s *followService) GetFollowList(uid uint, isFollow bool) ([]*dto.UserInfoD
 	}
 
 	return UserDTOList, nil
+
 }

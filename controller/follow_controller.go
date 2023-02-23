@@ -1,11 +1,11 @@
 package controller
 
 import (
+
 	"DouyinSimpleProject/dto"
 	"DouyinSimpleProject/service"
 	"DouyinSimpleProject/utils"
 	"net/http"
-
 	"github.com/gin-gonic/gin"
 )
 
@@ -16,6 +16,7 @@ type FollowController struct {
 func NewFollowController(followService service.FollowService) FollowController {
 	return FollowController{followService}
 }
+
 
 // Action handles `/relation/action/`
 func (c *FollowController) Action(ctx *gin.Context) {
@@ -31,6 +32,10 @@ func (c *FollowController) Action(ctx *gin.Context) {
 	}
 	uid := GetUID(ctx)
 
+	if uid == fuid {
+		ErrorResponse(ctx, "can not follow yourself")
+	}
+
 	err = c.followService.Action(uid, fuid, actionType)
 	if err != nil {
 		ErrorResponse(ctx, err.Error())
@@ -39,6 +44,7 @@ func (c *FollowController) Action(ctx *gin.Context) {
 	}
 
 }
+
 
 // FollowList handles `/relation/follow/list`
 func (c *FollowController) FollowList(ctx *gin.Context) {
@@ -82,3 +88,5 @@ func (c *FollowController) FollowerList(ctx *gin.Context) {
 		UserList: userDTOs,
 	})
 }
+
+
