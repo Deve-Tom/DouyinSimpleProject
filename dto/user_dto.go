@@ -38,24 +38,20 @@ type FollowInfoResponse struct {
 	UserList []*UserInfoDTO `json:"user_list"`
 }
 
-func NewUserInfoDTO(user *entity.User, loginUID uint, IsFollowlist bool) *UserInfoDTO {
+func NewUserInfoDTO(user *entity.User, loginUID uint) *UserInfoDTO {
 	isFollow := false
-	if IsFollowlist { //follower | follow list
+	//login user + feed
+	if user.ID == loginUID {
 		isFollow = true
-	} else {
-		//login user + feed
-		if user.ID == loginUID {
-			isFollow = true
+	}
+	if loginUID != 0 {
+		fq := dao.Q.Follow
+		cnt, err := fq.Where(fq.UserID.Eq(loginUID)).Where(fq.FollowUserID.Eq(user.ID)).Count()
+		if err != nil {
+			return nil
 		}
-		if loginUID != 0 {
-			fq := dao.Q.Follow
-			cnt, err := fq.Where(fq.UserID.Eq(loginUID)).Where(fq.FollowUserID.Eq(user.ID)).Count()
-			if err != nil {
-				return nil
-			}
-			if cnt != 0 {
-				isFollow = true
-			}
+		if cnt != 0 {
+			isFollow = true
 		}
 	}
 
