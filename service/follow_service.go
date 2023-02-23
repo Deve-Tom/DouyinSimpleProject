@@ -13,7 +13,6 @@ type FollowService interface {
 	Cancel(uid, fuid uint) error
 
 	GetFollowList(uid uint, isFollow bool) ([]*dto.UserInfoDTO, error)
-
 }
 
 type followService struct{}
@@ -124,7 +123,7 @@ func (s *followService) GetFollowList(uid uint, isFollow bool) ([]*dto.UserInfoD
 
 	UserDTOList := make([]*dto.UserInfoDTO, len(users))
 	for i, user := range users {
-		UserDTOList[i] = dto.NewUserInfoDTO(user, uid, true)
+		UserDTOList[i] = dto.NewUserInfoDTO(user, uid)
 	}
 
 	return UserDTOList, nil
